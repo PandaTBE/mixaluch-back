@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     "store",
     "mptt",
     "rest_framework",
+    "rest_framework.authtoken",
+    "djoser",
+    "accounts",
 ]
 
 MIDDLEWARE = [
@@ -106,7 +109,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "ru-ru"
 
 TIME_ZONE = "UTC"
 
@@ -114,6 +117,12 @@ USE_I18N = True
 
 USE_TZ = True
 
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_HOST_USER = "mixaluch.alerts@gmail.com"
+EMAIL_HOST_PASSWORD = "zzjeqgarlqylusir"
+EMAIL_USE_TLS = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
@@ -129,7 +138,31 @@ MEDIA_ROOT = BASE_DIR / "media/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
-    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly"]
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly",
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework.authentication.TokenAuthentication",),
 }
+
+DOMAIN = "localhost:3000"
+SITE_NAME = "mixaluch-shop"
+
+DJOSER = {
+    "LOGIN_FIELD": "email",
+    "USER_CREATE_PASSWORD_RETYPE": True,
+    "USERNAME_CHANGED_EMAIL_CONFIRMATION": True,
+    "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
+    "SEND_CONFIRMATION_EMAIL": True,
+    "SET_PASSWORD_RETYPE": True,
+    "PASSWORD_RESET_CONFIRM_URL": "password/reset/confirm/{uid}/{token}",
+    "USERNAME_RESET_CONFIRM_URL": "email/reset/confirm/{uid}/{token}",
+    "ACTIVATION_URL": "activate/{uid}/{token}",
+    "SEND_ACTIVATION_EMAIL": True,
+    "SERIALIZERS": {
+        "user_create": "accounts.serializers.UserCreateSerializer",
+        "user": "accounts.serializers.UserCreateSerializer",
+        "user_delete": "djoser.serializers.UserDeleteSerializer",
+    },
+}
+
+AUTH_USER_MODEL = "accounts.UserAccount"
