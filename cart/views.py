@@ -27,8 +27,9 @@ class CartView(APIView):
         user = request.user
         cart, _ = Cart.objects.get_or_create(user=user)
         queryset = CartItem.objects.filter(cart=cart)
+        cart_items = CartItemSerializer(queryset, many=True).data
         serializer = CartSerializer(instance=cart)
-        return Response(serializer.data)
+        return Response({"cart": serializer.data, "products": cart_items})
 
     def post(self, request):
         data = request.data
@@ -64,6 +65,11 @@ class CartView(APIView):
         cart_item = CartItem.objects.get(id=data.get("id"))
         cart_item.delete()
         cart = Cart.objects.get(user=user)
-        queryset = CartItem.objects.filter(cart=cart)
+        queryset = CartItem.objects.filter(cart=cart.id)
+        total_price = 0
+        for item in queryset:
+            total_price += item.total_price
+            cart.total_price = total_price
+        cart.save()
         serializer = CartItemSerializer(queryset, many=True)
         return Response(serializer.data)
