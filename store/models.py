@@ -1,9 +1,10 @@
 from tabnanny import verbose
 
+from mptt.models import MPTTModel, TreeForeignKey
+
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from mptt.models import MPTTModel, TreeForeignKey
 
 
 class Category(MPTTModel):
@@ -104,6 +105,7 @@ class Product(models.Model):
         help_text=_("Change product visibility"),
         default=True,
     )
+    is_popular = models.BooleanField(verbose_name=_("Is popular?"), default=False)
     created_at = models.DateTimeField(_("Created at"), auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True)
 
