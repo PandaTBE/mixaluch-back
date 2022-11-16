@@ -1,9 +1,7 @@
 from rest_framework import generics
 
-from django.shortcuts import render
-
-from .models import Category, Product
-from .serializers import CategorySerializer, ProductSerializer
+from .models import Product
+from .serializers import ProductSerializer
 
 
 class ProductListView(generics.ListAPIView):
@@ -19,8 +17,3 @@ class SingleProduct(generics.RetrieveAPIView):
 class PopularProducts(generics.ListAPIView):
     queryset = Product.objects.filter(is_popular=True)
     serializer_class = ProductSerializer
-
-
-class CategoryListView(generics.ListAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
