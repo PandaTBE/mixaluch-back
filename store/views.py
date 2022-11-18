@@ -1,8 +1,7 @@
 from rest_framework import generics, status
-from rest_framework.response import Response
 
 from categories.models import Category
-from django.http import Http404, HttpResponse
+from django.http import Http404
 
 from .models import Product
 from .serializers import ProductSerializer
