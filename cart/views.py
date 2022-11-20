@@ -1,75 +1,91 @@
-from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from django.shortcuts import render
 from store.models import Product
 
-from .models import Cart, CartItem
+from .models import CartItem
 from .serializers import *
 
+# class CartRetriveApiView(generics.RetrieveAPIView):
+#     queryset = Cart.objects.all()
+#     serializer_class = CartSerializer
+#     permission_classes = [IsAuthenticated]
 
-class CartRetriveApiView(generics.RetrieveAPIView):
-    queryset = Cart.objects.all()
-    serializer_class = CartSerializer
+#     def get_object(self):
+#         user = self.request.user
+#         cart, _ = Cart.objects.get_or_create(user=user)
+#         return cart
+
+
+class CartItemListApiView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = CartItemSerializer
 
-    def get_object(self):
+    def get_queryset(self):
+        """
+        Получение товаров в карзине для конкретного пользователя
+        """
         user = self.request.user
-        cart, _ = Cart.objects.get_or_create(user=user)
-        return cart
+        return CartItem.objects.filter(user=user)
 
 
-class CartView(APIView):
+class CartItemRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        user = request.user
-        cart, _ = Cart.objects.get_or_create(user=user)
-        queryset = CartItem.objects.filter(cart=cart)
-        cart_items = CartItemSerializer(queryset, many=True).data
-        serializer = CartSerializer(instance=cart)
-        return Response({"cart": serializer.data, "products": cart_items})
 
-    def post(self, request):
-        data = request.data
-        user = request.user
-        cart = Cart.objects.get(user=user)
-        product = Product.objects.get(id=data.get("product"))
-        quantity = data.get("quantity")
-        cart_item = CartItem(cart=cart, product=product, quantity=quantity)
-        cart_item.save()
+# class CartView(APIView):
+#     permission_classes = [IsAuthenticated]
 
-        cart_items = CartItem.objects.filter(cart=cart.id)
-        total_price = 0
-        for item in cart_items:
-            total_price += item.total_price
-            cart.total_price = total_price
-        cart.save()
+#     def get(self, request):
+#         user = request.user
+#         cart, _ = Cart.objects.get_or_create(user=user)
+#         queryset = CartItem.objects.filter(cart=cart)
+#         cart_items = CartItemSerializer(queryset, many=True).data
+#         serializer = CartSerializer(instance=cart)
+#         return Response({"cart": serializer.data, "products": cart_items})
 
-        return Response({"success": "Items Added to your cart"})
+#     def post(self, request):
+#         data = request.data
+#         user = request.user
+#         cart = Cart.objects.get(user=user)
+#         product = Product.objects.get(id=data.get("product"))
+#         quantity = data.get("quantity")
+#         cart_item = CartItem(cart=cart, product=product, quantity=quantity)
+#         cart_item.save()
 
-    def patch(self, request):
-        data = request.data
-        cart_item = CartItem.objects.get(id=data.get("id"))
-        quantity = data.get("quantity")
+#         cart_items = CartItem.objects.filter(cart=cart.id)
+#         total_price = 0
+#         for item in cart_items:
+#             total_price += item.total_price
+#             cart.total_price = total_price
+#         cart.save()
 
-        cart_item.quantity = quantity
-        cart_item.save()
-        return Response({"success": "Item updated"})
+#         return Response({"success": "Items Added to your cart"})
 
-    def delete(self, request):
-        user = request.user
-        data = request.data
+#     def patch(self, request):
+#         data = request.data
+#         cart_item = CartItem.objects.get(id=data.get("id"))
+#         quantity = data.get("quantity")
 
-        cart_item = CartItem.objects.get(id=data.get("id"))
-        cart_item.delete()
-        cart = Cart.objects.get(user=user)
-        queryset = CartItem.objects.filter(cart=cart.id)
-        total_price = 0
-        for item in queryset:
-            total_price += item.total_price
-            cart.total_price = total_price
-        cart.save()
-        serializer = CartItemSerializer(queryset, many=True)
-        return Response(serializer.data)
+#         cart_item.quantity = quantity
+#         cart_item.save()
+#         return Response({"success": "Item updated"})
+
+#     def delete(self, request):
+#         user = request.user
+#         data = request.data
+
+#         cart_item = CartItem.objects.get(id=data.get("id"))
+#         cart_item.delete()
+#         cart = Cart.objects.get(user=user)
+#         queryset = CartItem.objects.filter(cart=cart.id)
+#         total_price = 0
+#         for item in queryset:
+#             total_price += item.total_price
+#             cart.total_price = total_price
+#         cart.save()
+#         serializer = CartItemSerializer(queryset, many=True)
+#         return Response(serializer.data)
