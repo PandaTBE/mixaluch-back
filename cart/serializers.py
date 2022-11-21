@@ -10,9 +10,20 @@ from .models import *
 class CartItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer()
 
-    def create(self, validated_data):
-        return super().create(validated_data)
+    class Meta:
+        model = CartItem
+        fields = ["id", "total_price", "product", "quantity", "user"]
+
+
+class CartItemCreateSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = CartItem
-        fields = ["id", "product", "total_price", "quantity"]
+        fields = "__all__"
+
+
+class CartItemDetailSerializer(CartItemSerializer):
+    def create(self, validated_data):
+        item = CartItem.objects.create(validated_data)
+        return item
