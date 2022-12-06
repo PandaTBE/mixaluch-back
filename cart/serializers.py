@@ -28,7 +28,7 @@ class CartItemCreateSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class CartItemDetailSerializer(CartItemSerializer):
-    def create(self, validated_data):
-        item = CartItem.objects.create(validated_data)
-        return item
+# class CartItemDetailSerializer(CartItemSerializer):
+#     def create(self, validated_data):
+#         item = CartItem.objects.create(validated_data)
+#         return item
