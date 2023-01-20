@@ -15,6 +15,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from config import TELEGRAM_BOT_API_KEY_CONFIG
+
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -182,4 +184,4 @@ DJOSER = {
 }
 
 AUTH_USER_MODEL = "accounts.UserAccount"
-TELEGRAM_BOT_API_KEY = os.getenv("TELEGRAM_BOT_API_KEY")
+TELEGRAM_BOT_API_KEY = TELEGRAM_BOT_API_KEY_CONFIG

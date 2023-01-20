@@ -37,7 +37,16 @@ def correct_price(sender, instance, created, **kwargs):
     """
     if created:
 
-        message_handler(123, gen_markup(instance.id))
+        message_handler(create_message(instance), gen_markup(instance.id))
+
+
+def create_message(instance):
+    return f"Статус заказа: {instance.status}\n\
+Имя: {instance.name}\n\
+Фамилия: {instance.second_name}\n\
+Телефон: {instance.phone_number}\n\
+Почта: {instance.email}\n\
+"
 
 
 def gen_markup(order_id):
@@ -46,9 +55,32 @@ def gen_markup(order_id):
     markup.row_width = 2
     markup.add(
         InlineKeyboardButton(
-            order_id,
+            "В обработке",
+            callback_data=f"{order_id},IN_PROCESS",
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            "Принят",
+            callback_data=f"{order_id},ACCEPTED",
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            "Собран",
+            callback_data=f"{order_id},COLLECTED",
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            "В доставке",
+            callback_data=f"{order_id},IN_DELIVERY",
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            "Заавершен",
             callback_data=f"{order_id},COMPLETED",
         ),
-        InlineKeyboardButton("No", callback_data="cb_no"),
     )
     return markup
