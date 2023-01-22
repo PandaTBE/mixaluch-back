@@ -4,7 +4,7 @@ from core import settings
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from orders.management.commands.bot import Command, message_handler
+from orders.management.commands.bot import message_handler
 
 # Create your models here.
 
@@ -17,14 +17,34 @@ class OrderStatus(models.TextChoices):
     COMPLETED = "COMPLETED", "Выполнен"
 
 
+class DeliveryType(models.TextChoices):
+    SELF_DELIVERY = (
+        "SELF_DELIVERY",
+        "Самовывоз",
+    )
+    COURIER_DELIVERY = "COURIER_DELIVERY", "Курьером"
+
+
+class PaymentType(models.TextChoices):
+    CASH_PAYMENT = "CASH_PAYMENT", "Наличными"
+    CARD_PAYMENT = "CARD_PAYMENT", "Картой"
+
+
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, default=None)
-    email = models.EmailField(max_length=255)
     name = models.CharField(max_length=255)
-    second_name = models.CharField(max_length=255, null=True, default=None, blank=True)
     phone_number = models.CharField(max_length=30, null=False, blank=False)
     status = models.CharField(max_length=30, choices=OrderStatus.choices, default=OrderStatus.IN_PROCESS)
+    comment = models.CharField(blank=True, default="", max_length=3000)
+    address = models.CharField(blank=True, default="", max_length=1000)
+    delivery_type = models.CharField(
+        max_length=50, choices=DeliveryType.choices, default=DeliveryType.COURIER_DELIVERY
+    )
+    payment_type = models.CharField(max_length=50, choices=PaymentType.choices, default=PaymentType.CARD_PAYMENT)
     order_data = models.JSONField(default=dict)
+    delivery_cost = models.PositiveIntegerField(default=0)
+    products_total = models.PositiveIntegerField(default=0)
+    total = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"{self.email} - {self.name}"
