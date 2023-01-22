@@ -47,7 +47,7 @@ class Order(models.Model):
     total = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return f"{self.email} - {self.name}"
+        return f"{self.name}-{self.phone_number}"
 
 
 @receiver(post_save, sender=Order)
@@ -63,9 +63,8 @@ def correct_price(sender, instance, created, **kwargs):
 def create_message(instance):
     return f"Статус заказа: {instance.status}\n\
 Имя: {instance.name}\n\
-Фамилия: {instance.second_name}\n\
 Телефон: {instance.phone_number}\n\
-Почта: {instance.email}\n\
+Адрес: {instance.address}\
 "
 
 
