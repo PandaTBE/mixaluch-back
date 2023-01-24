@@ -7,4 +7,5 @@ app_name = "orders"
 urlpatterns = [
     path("api/orders/", views.OrderListCreateAPIView.as_view()),
     path("api/orders/<int:pk>/", views.OrderRetriveUpdateAPIView.as_view()),
+    path("api/order-info/<int:pk>/", views.OrderRetriveAPIView.as_view()),
 ]

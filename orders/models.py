@@ -1,8 +1,9 @@
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 
+from cart.models import CartItem
 from core import settings
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from orders.management.commands.bot import message_handler
 
@@ -45,18 +46,30 @@ class Order(models.Model):
     delivery_cost = models.PositiveIntegerField(default=0)
     total_sum = models.PositiveIntegerField(default=0)
     total_sum_with_delivery = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.name}-{self.phone_number}"
 
 
+@receiver(pre_save, sender=Order)
+def clear_cart(sender, instance, **kwargs):
+    """
+    Сигнал срабатвает перед сохранение заказа и очищает корзину
+    """
+    user = instance.user
+
+    if user is not None:
+        CartItem.objects.filter(user=user).delete()
+
+
 @receiver(post_save, sender=Order)
 def correct_price(sender, instance, created, **kwargs):
     """
-    Сигнал срабатывает при сохранении CartItem
+    Сигнал срабатывает после сохранении CartItem. Отправлеяет сообщение в телеграмм
     """
     if created:
-
         message_handler(create_message(instance), gen_markup(instance.id))
 
 

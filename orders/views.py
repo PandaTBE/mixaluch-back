@@ -25,3 +25,8 @@ class OrderRetriveUpdateAPIView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = OrderSerializer
     queryset = Order.objects.all()
+
+
+class OrderRetriveAPIView(generics.RetrieveAPIView):
+    serializer_class = OrderSerializer
+    queryset = Order.objects.all()
