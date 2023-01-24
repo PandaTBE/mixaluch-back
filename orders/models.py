@@ -43,8 +43,8 @@ class Order(models.Model):
     payment_type = models.CharField(max_length=50, choices=PaymentType.choices, default=PaymentType.CARD_PAYMENT)
     order_data = models.JSONField(default=dict)
     delivery_cost = models.PositiveIntegerField(default=0)
-    products_total = models.PositiveIntegerField(default=0)
-    total = models.PositiveIntegerField(default=0)
+    total_sum = models.PositiveIntegerField(default=0)
+    total_sum_with_delivery = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"{self.name}-{self.phone_number}"
