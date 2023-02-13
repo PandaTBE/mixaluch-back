@@ -13,6 +13,7 @@ class OrderListCreateAPIView(generics.ListCreateAPIView):
         user = self.request.user
         if not user.is_anonymous:
             return Order.objects.filter(user=user)
+        return Order.object.all()
 
     def perform_create(self, serializer):
         user = self.request.user
