@@ -46,18 +46,22 @@ def callback_query(call):
         status_regexp, f"Статус заказа:  {ORDER_STATUS_NAMES_MAP.get(order_status, '?')}\n\n", message_text
     )
 
-    requests.patch(
-        f"{HOST_URL}/api/orders/{order_id}/",
-        data={"status": order_status},
-        headers={"Authorization": f"Token {admin_token}"},
-    )
-    bot.edit_message_text(
-        chat_id=chat_id,
-        text=new_message,
-        message_id=call.message.message_id,
-        reply_markup=call.message.reply_markup,
-        parse_mode="html",
-    )
+    try:
+        response = requests.patch(
+            f"{HOST_URL}/api/orders/{order_id}/",
+            data={"status": order_status},
+            headers={"Authorization": f"Token {admin_token}"},
+        )
+        response.raise_for_status()
+        bot.edit_message_text(
+            chat_id=chat_id,
+            text=new_message,
+            message_id=call.message.message_id,
+            reply_markup=call.message.reply_markup,
+            parse_mode="html",
+        )
+    except requests.exceptions.HTTPError as err:
+        print(">>> Ошибка при изменении статуса заказа ботом:   ", err)
 
 
 def message_handler(message, markup):
