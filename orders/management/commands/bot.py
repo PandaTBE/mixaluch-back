@@ -2,15 +2,22 @@ import os
 import re
 
 import requests
+from django.core.management.base import BaseCommand
 from telebot import TeleBot
 
-from config import ADMIN_TOKEN, TELEGRAM_CHAT_ID
-from core import settings
-from django.core.management.base import BaseCommand
+from config import ADMIN_TOKEN, HOST_URL, TELEGRAM_BOT_API_KEY, TELEGRAM_CHAT_ID
 
 # Объявление переменной бота
-bot = TeleBot(settings.TELEGRAM_BOT_API_KEY, threaded=False)
+bot = TeleBot(TELEGRAM_BOT_API_KEY, threaded=False)
 chat_id = TELEGRAM_CHAT_ID
+
+ORDER_STATUS_NAMES_MAP = {
+    "IN_PROCESS": "В обработке",
+    "ACCEPTED": "Принят",
+    "COLLECTED": "Собран",
+    "IN_DELIVERY": "В доставке",
+    "COMPLETED": "Выполнен",
+}
 
 
 # Название класса обязательно - "Command"
@@ -27,7 +34,7 @@ class Command(BaseCommand):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
 
-    status_regexp = "Статус заказа: \w+\n"
+    status_regexp = "Статус заказа:  \D+(?=Заказчик)"
 
     order_id = call.data.split(",")[0]
     order_status = call.data.split(",")[1]
@@ -35,10 +42,14 @@ def callback_query(call):
 
     message_text = call.message.text
 
-    new_message = re.sub(status_regexp, f"Статус заказа: {order_status}\n", message_text)
+    new_message = re.sub(
+        status_regexp, f"Статус заказа:  {ORDER_STATUS_NAMES_MAP.get(order_status, '?')}\n\n", message_text
+    )
+
+    print(order_status)
 
     requests.patch(
-        f"http://127.0.0.1:8000/api/orders/{order_id}/",
+        f"{HOST_URL}/api/orders/{order_id}/",
         data={"status": order_status},
         headers={"Authorization": f"Token {admin_token}"},
     )
@@ -47,6 +58,7 @@ def callback_query(call):
         text=new_message,
         message_id=call.message.message_id,
         reply_markup=call.message.reply_markup,
+        parse_mode="html",
     )
 
 

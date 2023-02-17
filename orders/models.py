@@ -1,10 +1,12 @@
+import math
+
+from django.db import models
+from django.db.models.signals import post_save, pre_save
+from django.dispatch import receiver
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from cart.models import CartItem
 from core import settings
-from django.db import models
-from django.db.models.signals import post_save, pre_save
-from django.dispatch import receiver
 from orders.management.commands.bot import message_handler
 
 # Create your models here.
@@ -18,6 +20,15 @@ class OrderStatus(models.TextChoices):
     COMPLETED = "COMPLETED", "Выполнен"
 
 
+ORDER_STATUS_NAMES_MAP = {
+    "IN_PROCESS": "В обработке",
+    "ACCEPTED": "Принят",
+    "COLLECTED": "Собран",
+    "IN_DELIVERY": "В доставке",
+    "COMPLETED": "Выполнен",
+}
+
+
 class DeliveryType(models.TextChoices):
     SELF_DELIVERY = (
         "SELF_DELIVERY",
@@ -26,9 +37,18 @@ class DeliveryType(models.TextChoices):
     COURIER_DELIVERY = "COURIER_DELIVERY", "Курьером"
 
 
+DELIVERY_TYPE_NAMES_MAP = {"SELF_DELIVERY": "Самовывоз", "COURIER_DELIVERY": "Курьером"}
+
+
 class PaymentType(models.TextChoices):
     CASH_PAYMENT = "CASH_PAYMENT", "Наличными"
     CARD_PAYMENT = "CARD_PAYMENT", "Картой"
+
+
+PAYMENT_TYPE_NAMES_MAP = {
+    "CASH_PAYMENT": "Наличными",
+    "CARD_PAYMENT": "Картой",
+}
 
 
 class Order(models.Model):
@@ -56,7 +76,7 @@ class Order(models.Model):
 @receiver(pre_save, sender=Order)
 def clear_cart(sender, instance, **kwargs):
     """
-    Сигнал срабатвает перед сохранение заказа и очищает корзину
+    Сигнал срабатывает перед сохранение заказа и очищает корзину
     """
     user = instance.user
 
@@ -67,18 +87,51 @@ def clear_cart(sender, instance, **kwargs):
 @receiver(post_save, sender=Order)
 def correct_price(sender, instance, created, **kwargs):
     """
-    Сигнал срабатывает после сохранении CartItem. Отправлеяет сообщение в телеграмм
+    Сигнал срабатывает после сохранении CartItem. Отправляет сообщение в телеграмм
     """
     if created:
         message_handler(create_message(instance), gen_markup(instance.id))
 
 
+new_line = "\n"
+
+
 def create_message(instance):
-    return f"Статус заказа: {instance.status}\n\
-Имя: {instance.name}\n\
-Телефон: {instance.phone_number}\n\
-Адрес: {instance.address}\
-"
+
+    return f"\
+{format_order_data('Номер заказа', instance.id)}\
+{format_order_data('Статус заказа', ORDER_STATUS_NAMES_MAP.get(instance.status, '?'))}\
+{format_order_data('Заказчик', instance.name)}\
+{format_order_data('Телефон', instance.phone_number)}\
+{format_order_data('Тип доставки', DELIVERY_TYPE_NAMES_MAP.get(instance.delivery_type, '?'))}\
+{format_order_data('Адрес доставки', instance.address)}\
+{format_order_data('Расчет', PAYMENT_TYPE_NAMES_MAP.get(instance.payment_type, '?'))}\
+{format_order_data('Комментарий', instance.comment)}\
+{format_order_data('Стоимость доставки', f'{instance.delivery_cost} руб.')}\
+{format_order_data('Итого', f'{instance.total_sum_with_delivery} руб.')}\
+{format_order_data('Заказ', format_order_products(instance.order_data.get('products', [])))}"
+
+
+def format_order_products(products):
+    tab = "    "
+
+    result = "\n"
+    for product in products:
+        value = f"\
+{tab}{format_title('Товар')}   {product['product']['title']}{new_line}\
+{tab}{format_title('Цена')}    {product['product']['regular_price']}{new_line} руб.\
+{tab}{format_title('Кол-во')}  {product['quantity']} кг.{new_line}\
+{tab}{format_title('Сумма')}   {math.floor(product['quantity'] * product['product']['regular_price'])} руб.{new_line * 2}"
+        result += value
+    return result
+
+
+def format_order_data(title, value):
+    return f"{format_title(title)}  {value}{new_line * 2}"
+
+
+def format_title(title):
+    return f"<b><i>{title}:</i></b>"
 
 
 def gen_markup(order_id):
@@ -111,7 +164,7 @@ def gen_markup(order_id):
     )
     markup.add(
         InlineKeyboardButton(
-            "Заавершен",
+            "Выполнен",
             callback_data=f"{order_id},COMPLETED",
         ),
     )
