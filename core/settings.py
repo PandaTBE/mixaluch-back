@@ -15,7 +15,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from config import SQL_BD_HOST, SQL_BD_NAME, SQL_BD_PASSWORD, SQL_BD_USER
+from config import FRONT_DOMAIN, SQL_BD_HOST, SQL_BD_NAME, SQL_BD_PASSWORD, SQL_BD_USER
 
 load_dotenv()
 
@@ -174,7 +174,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework.authentication.TokenAuthentication",),
 }
 
-DOMAIN = "localhost:3000"
+DOMAIN = FRONT_DOMAIN
 SITE_NAME = "mixaluch-shop"
 
 DJOSER = {
