@@ -46,8 +46,6 @@ def callback_query(call):
         status_regexp, f"Статус заказа:  {ORDER_STATUS_NAMES_MAP.get(order_status, '?')}\n\n", message_text
     )
 
-    print(order_status)
-
     requests.patch(
         f"{HOST_URL}/api/orders/{order_id}/",
         data={"status": order_status},

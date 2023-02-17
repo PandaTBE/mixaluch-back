@@ -15,6 +15,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from config import SQL_BD_HOST, SQL_BD_NAME, SQL_BD_PASSWORD, SQL_BD_USER
+
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -100,6 +102,19 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.mysql",
+#         "NAME": SQL_BD_NAME,
+#         "USER": SQL_BD_USER,
+#         "PASSWORD": SQL_BD_PASSWORD,
+#         "HOST": SQL_BD_HOST,
+#         "OPTIONS": {
+#             "init_command": "SET foreign_key_checks = 0;",
+#         },
+#     }
+# }
 
 
 # Password validation
