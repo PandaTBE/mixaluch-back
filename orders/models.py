@@ -119,7 +119,7 @@ def format_order_products(products):
     for product in products:
         value = f"\
 {tab}{format_title('Товар')}   {product['product']['title']}{new_line}\
-{tab}{format_title('Цена')}    {product['product']['regular_price']}{new_line} руб.\
+{tab}{format_title('Цена')}    {product['product']['regular_price']} руб.{new_line}\
 {tab}{format_title('Кол-во')}  {product['quantity']} кг.{new_line}\
 {tab}{format_title('Сумма')}   {math.floor(product['quantity'] * product['product']['regular_price'])} руб.{new_line * 2}"
         result += value
