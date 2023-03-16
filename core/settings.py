@@ -13,11 +13,16 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from pathlib import Path
 
-from dotenv import load_dotenv
-
-from config import FRONT_DOMAIN, SQL_BD_HOST, SQL_BD_NAME, SQL_BD_PASSWORD, SQL_BD_USER
-
-load_dotenv()
+from config import (
+    FRONT_DOMAIN,
+    MY_EMAIL_HOST_PASSWORD,
+    MY_EMAIL_HOST_USER,
+    MY_SECRET_KEY,
+    DATABASE_URL,
+    MY_DEBUG,
+    MY_CSRF_TRUSTED_ORIGINS,
+    MY_CORS_ALLOWED_ORIGINS
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,13 +32,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-z2!qg17#1+4v%+85b74y=n@_o#83x_0^@idnm&3f=(@n&3bfh7"
+SECRET_KEY = MY_SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = MY_DEBUG
 
 ALLOWED_HOSTS = ["*"]
-
+CSRF_TRUSTED_ORIGINS = MY_CSRF_TRUSTED_ORIGINS.split(' ')
 
 # Application definition
 
@@ -68,9 +73,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-]
+CORS_ALLOWED_ORIGINS = MY_CORS_ALLOWED_ORIGINS.split(' ')
 
 ROOT_URLCONF = "core.urls"
 
@@ -96,25 +99,11 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
+import dj_database_url
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.mysql",
-#         "NAME": SQL_BD_NAME,
-#         "USER": SQL_BD_USER,
-#         "PASSWORD": SQL_BD_PASSWORD,
-#         "HOST": SQL_BD_HOST,
-#         "OPTIONS": {
-#             "init_command": "SET foreign_key_checks = 0;",
-#         },
-#     }
-# }
+DATABASES = {
+    'default': dj_database_url.config(default=DATABASE_URL)
+}
 
 
 # Password validation
@@ -150,17 +139,17 @@ USE_TZ = True
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
-EMAIL_HOST_USER = "mixaluch.alerts@gmail.com"
-EMAIL_HOST_PASSWORD = "oioqfkacmbyaizfo"
+EMAIL_HOST_USER = MY_EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = MY_EMAIL_HOST_PASSWORD
 EMAIL_USE_TLS = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = "static/"
-
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media/"
+STATIC_URL = '/static/'
+STATIC_ROOT = '/var/www/static'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = '/var/www/media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field

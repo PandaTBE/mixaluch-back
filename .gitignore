@@ -90,3 +90,6 @@ local_settings.py
 .env
 .venv
 venv
+
+.pg-env
+persistentdata/*

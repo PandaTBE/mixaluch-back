@@ -1,12 +1,17 @@
+from config import HOST_URL
 from rest_framework import serializers
 
 from .models import Product, ProductImage
 
 
 class ImageSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField('get_image_url')
     class Meta:
         model = ProductImage
         fields = "__all__"
+    
+    def get_image_url(self, obj):
+        return f"{HOST_URL}{obj.image.url}"
 
 
 class ProductSerializer(serializers.ModelSerializer):
