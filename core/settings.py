@@ -13,20 +13,12 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from pathlib import Path
 
-from config import (
-    FRONT_DOMAIN,
-    MY_EMAIL_HOST_PASSWORD,
-    MY_EMAIL_HOST_USER,
-    MY_SECRET_KEY,
-    DATABASE_URL,
-    MY_DEBUG,
-    MY_CSRF_TRUSTED_ORIGINS,
-    MY_CORS_ALLOWED_ORIGINS
-)
+from config import (FRONT_DOMAIN, MY_EMAIL_HOST_PASSWORD, MY_EMAIL_HOST_USER,
+                    MY_SECRET_KEY, DATABASE_URL, MY_DEBUG,
+                    MY_CSRF_TRUSTED_ORIGINS, MY_CORS_ALLOWED_ORIGINS)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -95,35 +87,34 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "core.wsgi.application"
 
-
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 import dj_database_url
 
-DATABASES = {
-    'default': dj_database_url.config(default=DATABASE_URL)
-}
-
+DATABASES = {'default': dj_database_url.config(default=DATABASE_URL)}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME":
+        "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "NAME":
+        "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+        "NAME":
+        "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+        "NAME":
+        "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
@@ -147,9 +138,9 @@ EMAIL_USE_TLS = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = '/var/www/static'
+STATIC_ROOT = '/persistentdata/static'
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/var/www/media'
+MEDIA_ROOT = '/persistentdata/media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -160,7 +151,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly",
     ],
-    "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework.authentication.TokenAuthentication",),
+    "DEFAULT_AUTHENTICATION_CLASSES":
+    ("rest_framework.authentication.TokenAuthentication", ),
 }
 
 DOMAIN = FRONT_DOMAIN
