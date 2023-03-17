@@ -138,9 +138,9 @@ EMAIL_USE_TLS = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = '/persistentdata/static'
+STATIC_ROOT = '/var/www/static'
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/persistentdata/media'
+MEDIA_ROOT = '/var/www/media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
