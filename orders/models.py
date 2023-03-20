@@ -91,8 +91,8 @@ def clear_cart(sender, instance, **kwargs):
     """
     user = instance.user
 
-    # if user is not None:
-    #     CartItem.objects.filter(user=user).delete()
+    if user is not None:
+        CartItem.objects.filter(user=user).delete()
 
 
 @receiver(post_save, sender=Order)
@@ -100,8 +100,8 @@ def correct_price(sender, instance, created, **kwargs):
     """
     Сигнал срабатывает после сохранении CartItem. Отправляет сообщение в телеграмм
     """
-    # if created:
-    #     message_handler(create_message(instance), gen_markup(instance.id))
+    if created:
+        message_handler(create_message(instance), gen_markup(instance.id))
 
 
 new_line = "\n"
