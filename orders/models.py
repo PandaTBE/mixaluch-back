@@ -37,7 +37,10 @@ class DeliveryType(models.TextChoices):
     COURIER_DELIVERY = "COURIER_DELIVERY", "Курьером"
 
 
-DELIVERY_TYPE_NAMES_MAP = {"SELF_DELIVERY": "Самовывоз", "COURIER_DELIVERY": "Курьером"}
+DELIVERY_TYPE_NAMES_MAP = {
+    "SELF_DELIVERY": "Самовывоз",
+    "COURIER_DELIVERY": "Курьером"
+}
 
 
 class PaymentType(models.TextChoices):
@@ -52,16 +55,24 @@ PAYMENT_TYPE_NAMES_MAP = {
 
 
 class Order(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, default=None)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.SET_NULL,
+                             null=True,
+                             blank=True,
+                             default=None)
     name = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=30, null=False, blank=False)
-    status = models.CharField(max_length=30, choices=OrderStatus.choices, default=OrderStatus.IN_PROCESS)
+    status = models.CharField(max_length=30,
+                              choices=OrderStatus.choices,
+                              default=OrderStatus.IN_PROCESS)
     comment = models.CharField(blank=True, default="", max_length=3000)
     address = models.CharField(blank=True, default="", max_length=1000)
-    delivery_type = models.CharField(
-        max_length=50, choices=DeliveryType.choices, default=DeliveryType.COURIER_DELIVERY
-    )
-    payment_type = models.CharField(max_length=50, choices=PaymentType.choices, default=PaymentType.CARD_PAYMENT)
+    delivery_type = models.CharField(max_length=50,
+                                     choices=DeliveryType.choices,
+                                     default=DeliveryType.COURIER_DELIVERY)
+    payment_type = models.CharField(max_length=50,
+                                    choices=PaymentType.choices,
+                                    default=PaymentType.CARD_PAYMENT)
     order_data = models.JSONField(default=dict)
     delivery_cost = models.PositiveIntegerField(default=0)
     total_sum = models.PositiveIntegerField(default=0)
@@ -80,8 +91,8 @@ def clear_cart(sender, instance, **kwargs):
     """
     user = instance.user
 
-    if user is not None:
-        CartItem.objects.filter(user=user).delete()
+    # if user is not None:
+    #     CartItem.objects.filter(user=user).delete()
 
 
 @receiver(post_save, sender=Order)
@@ -89,8 +100,8 @@ def correct_price(sender, instance, created, **kwargs):
     """
     Сигнал срабатывает после сохранении CartItem. Отправляет сообщение в телеграмм
     """
-    if created:
-        message_handler(create_message(instance), gen_markup(instance.id))
+    # if created:
+    #     message_handler(create_message(instance), gen_markup(instance.id))
 
 
 new_line = "\n"
@@ -122,6 +133,7 @@ def format_order_products(products):
 {tab}{format_title('Цена')}    {product['product']['regular_price']} руб.{new_line}\
 {tab}{format_title('Кол-во')}  {product['quantity']} кг.{new_line}\
 {tab}{format_title('Сумма')}   {math.floor(product['quantity'] * product['product']['regular_price'])} руб.{new_line * 2}"
+
         result += value
     return result
 
@@ -142,30 +154,25 @@ def gen_markup(order_id):
         InlineKeyboardButton(
             "В обработке",
             callback_data=f"{order_id},IN_PROCESS",
-        )
-    )
+        ))
     markup.add(
         InlineKeyboardButton(
             "Принят",
             callback_data=f"{order_id},ACCEPTED",
-        )
-    )
+        ))
     markup.add(
         InlineKeyboardButton(
             "Собран",
             callback_data=f"{order_id},COLLECTED",
-        )
-    )
+        ))
     markup.add(
         InlineKeyboardButton(
             "В доставке",
             callback_data=f"{order_id},IN_DELIVERY",
-        )
-    )
+        ))
     markup.add(
         InlineKeyboardButton(
             "Выполнен",
             callback_data=f"{order_id},COMPLETED",
-        ),
-    )
+        ), )
     return markup
