@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = MY_SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = MY_DEBUG
+DEBUG = bool(int(MY_DEBUG))
 
 ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS = MY_CSRF_TRUSTED_ORIGINS.split(' ')
