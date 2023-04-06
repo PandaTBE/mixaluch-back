@@ -12,7 +12,9 @@ class ProductType(models.Model):
     типов продуктов, которые продаются.
     """
 
-    name = models.CharField(verbose_name=_("Product name"), help_text=_("Required"), max_length=255)
+    name = models.CharField(verbose_name=_("Product name"),
+                            help_text=_("Required"),
+                            max_length=255)
     is_active = models.BooleanField(default=True)
 
     class Meta:
@@ -30,7 +32,9 @@ class ProductSpecification(models.Model):
     """
 
     product_type = models.ForeignKey(ProductType, on_delete=models.RESTRICT)
-    name = models.CharField(verbose_name=_("Name"), help_text=_("Required"), max_length=255)
+    name = models.CharField(verbose_name=_("Name"),
+                            help_text=_("Required"),
+                            max_length=255)
 
     class Meta:
         verbose_name = _("Product specification")
@@ -38,6 +42,11 @@ class ProductSpecification(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class ProductUnit(models.TextChoices):
+    KG = "KG", "кг"
+    PC = "PC", "шт"
 
 
 class Product(models.Model):
@@ -52,7 +61,9 @@ class Product(models.Model):
         help_text=_("Required"),
         max_length=255,
     )
-    description = models.TextField(verbose_name=_("Description"), help_text=_("Not Required"), blank=True)
+    description = models.TextField(verbose_name=_("Description"),
+                                   help_text=_("Not Required"),
+                                   blank=True)
     slug = models.SlugField(max_length=255)
     regular_price = models.IntegerField(
         verbose_name=_("Regular price"),
@@ -77,14 +88,22 @@ class Product(models.Model):
         help_text=_("Change product visibility"),
         default=True,
     )
-    is_popular = models.BooleanField(verbose_name=_("Is popular?"), default=False)
-    created_at = models.DateTimeField(_("Created at"), auto_now_add=True, editable=False)
+    is_popular = models.BooleanField(verbose_name=_("Is popular?"),
+                                     default=False)
+    created_at = models.DateTimeField(_("Created at"),
+                                      auto_now_add=True,
+                                      editable=False)
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True)
+    unit = models.CharField(max_length=50,
+                            choices=ProductUnit.choices,
+                            default=ProductUnit.KG)
+    min_quantity = models.FloatField(default=0.3,
+                                     verbose_name=_("Min quantity"))
 
     class Meta:
-        ordering = ("-created_at",)
-        verbose_name = _("Product")
-        verbose_name_plural = _("Products")
+        ordering = ("-created_at", )
+        verbose_name = "Товар"
+        verbose_name_plural = "Товары"
 
     def get_absolute_url(self):
         return reverse("store:product_detail", args=[self.slug])
@@ -100,7 +119,8 @@ class ProductSpecificationValue(models.Model):
     """
 
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    specification = models.ForeignKey(ProductSpecification, on_delete=models.RESTRICT)
+    specification = models.ForeignKey(ProductSpecification,
+                                      on_delete=models.RESTRICT)
     value = models.CharField(
         verbose_name=_("Value"),
         help_text=_("Product specification value (maximum of 255 words"),
@@ -120,7 +140,9 @@ class ProductImage(models.Model):
     таблица изображения
     """
 
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="product_image")
+    product = models.ForeignKey(Product,
+                                on_delete=models.CASCADE,
+                                related_name="product_image")
     image = models.ImageField(
         verbose_name=_("Image"),
         help_text=_("Upload a product image"),
