@@ -3,6 +3,7 @@ import math
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
+from store.models import PRODUCT_UNIT_MAP
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from cart.models import CartItem
@@ -128,10 +129,12 @@ def format_order_products(products):
 
     result = "\n"
     for product in products:
+        unit = product['product'].get('unit', '')
+        translated_unit = PRODUCT_UNIT_MAP.get(unit, '')
         value = f"\
 {tab}{format_title('Товар')}   {product['product']['title']}{new_line}\
 {tab}{format_title('Цена')}    {product['product']['regular_price']} руб.{new_line}\
-{tab}{format_title('Кол-во')}  {product['quantity']} кг.{new_line}\
+{tab}{format_title('Кол-во')}  {product['quantity']} {translated_unit}.{new_line}\
 {tab}{format_title('Сумма')}   {math.floor(product['quantity'] * product['product']['regular_price'])} руб.{new_line * 2}"
 
         result += value

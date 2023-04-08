@@ -49,6 +49,9 @@ class ProductUnit(models.TextChoices):
     PC = "PC", "шт"
 
 
+PRODUCT_UNIT_MAP = {"KG": "кг", "PC": "шт"}
+
+
 class Product(models.Model):
     """
     таблица продуктов содержит все продукты
