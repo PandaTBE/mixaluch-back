@@ -13,9 +13,16 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from pathlib import Path
 
-from config import (FRONT_DOMAIN, MY_EMAIL_HOST_PASSWORD, MY_EMAIL_HOST_USER,
-                    MY_SECRET_KEY, DATABASE_URL, MY_DEBUG,
-                    MY_CSRF_TRUSTED_ORIGINS, MY_CORS_ALLOWED_ORIGINS)
+from config import (
+    FRONT_DOMAIN,
+    MY_EMAIL_HOST_PASSWORD,
+    MY_EMAIL_HOST_USER,
+    MY_SECRET_KEY,
+    DATABASE_URL,
+    MY_DEBUG,
+    MY_CSRF_TRUSTED_ORIGINS,
+    MY_CORS_ALLOWED_ORIGINS,
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -69,10 +76,12 @@ CORS_ALLOWED_ORIGINS = MY_CORS_ALLOWED_ORIGINS.split(' ')
 
 ROOT_URLCONF = "core.urls"
 
+TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [TEMPLATES_DIR],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -175,6 +184,10 @@ DJOSER = {
         "user": "accounts.serializers.UserCreateSerializer",
         "user_delete": "djoser.serializers.UserDeleteSerializer",
         "current_user": "accounts.serializers.CurrentUserSerializer",
+    },
+    'EMAIL': {
+        'activation': 'core.email.ActivationEmail',
+        'password_reset': 'core.email.PasswordResetEmail',
     },
 }
 
