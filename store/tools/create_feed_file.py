@@ -51,7 +51,7 @@ def create_yml_file(categories, products):
         ET.SubElement(offer, 'picture').text = f"{HOST_URL}/media/{main_image}"
         ET.SubElement(offer, 'description').text = product['description']
         ET.SubElement(offer,
-                      'shortDescription').text = product['description'][:255]
+                      'shortDescription').text = product['description'][:250]
 
     # create the YML file
     tree = ET.ElementTree(yml_catalog)
