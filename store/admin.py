@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path
-from store.tools.create_feed_file import create_yml_file
+from store.tools.get_ya_business_feed import get_ya_business_feed
+from store.tools.get_ya_webmaster_feed import get_ya_webmaster_feed
 
 from categories.models import Category
 
@@ -35,7 +36,7 @@ class ProductSpecificationValueInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    change_list_template = "store/CreateYmlFeedButton.html"
+    change_list_template = "store/CreateYmlFeedButtons.html"
 
     inlines = [ProductImageInline, ProductSpecificationValueInline]
     list_display = ["id", "title"]
@@ -43,12 +44,25 @@ class ProductAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = super().get_urls()
         my_urls = [
-            path('product-feed/', self.get_product_feed),
+            path('product-feed-ya-business/', self.ya_business_feed),
+            path('product-feed-ya-webmaster/', self.ya_webmaster_feed),
         ]
         return my_urls + urls
 
-    def get_product_feed(self, request):
+    def ya_business_feed(self, request):
+        """
+        Получение списка товаров для Я.Бизнеса
+        """
         categories = Category.objects.all().values()
         products = Product.objects.all().values()
-        response = create_yml_file(categories, products)
+        response = get_ya_business_feed(categories, products)
+        return response
+
+    def ya_webmaster_feed(self, request):
+        """
+        Получение списка товаров для Я.Вебмастера
+        """
+        categories = Category.objects.all().values()
+        products = Product.objects.all().values()
+        response = get_ya_webmaster_feed(categories, products)
         return response

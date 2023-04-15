@@ -1,0 +1,16 @@
+{% extends 'admin/change_list.html' %}
+
+{% block object-tools %}
+    <div style="display: flex; gap: 10px">
+        <form action="product-feed-ya-business/" method="POST">
+            {% csrf_token %}
+                <input type="submit" value="Фид для Я.Бизнес"/>
+        </form>
+        <form action="product-feed-ya-webmaster/" method="POST">
+            {% csrf_token %}
+                <input type="submit" value="Фид для Я.Вебмастер"/>
+        </form>
+    </div>
+    <br />
+    {{ block.super }}
+{% endblock %}

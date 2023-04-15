@@ -18,7 +18,8 @@ class ProductListView(generics.ListAPIView):
                 current_category = Category.objects.get(slug=category)
                 available_categories.append(current_category)
                 if current_category.parent is None:
-                    child_categories = Category.objects.filter(parent=current_category.id)
+                    child_categories = Category.objects.filter(
+                        parent=current_category.id)
                     for category in child_categories:
                         available_categories.append(category)
             except:

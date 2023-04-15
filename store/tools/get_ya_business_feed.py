@@ -6,7 +6,18 @@ from store.models import ProductImage
 from config import HOST_URL, FRONT_PROTOCOL, FRONT_DOMAIN
 
 
-def create_yml_file(categories, products):
+def get_ya_business_feed(categories, products):
+    """
+    Функция для генерации списка продуктов в формате xml
+    для яндекс бизнеса
+
+    Args:
+        categories (Category): все категории
+        products (Product): все товары
+
+    Returns:
+        xml: Скачивает файл
+    """
     # create the root element
     yml_catalog = ET.Element('yml_catalog')
 
@@ -50,6 +61,10 @@ def create_yml_file(categories, products):
         ET.SubElement(offer, 'categoryId').text = str(product['category_id'])
         ET.SubElement(offer, 'picture').text = f"{HOST_URL}/media/{main_image}"
         ET.SubElement(offer, 'description').text = product['description']
+        ET.SubElement(
+            offer, 'url'
+        ).text = f"{FRONT_PROTOCOL}://{FRONT_DOMAIN}/catalog/{str(product['id'])}"
+
         ET.SubElement(offer,
                       'shortDescription').text = product['description'][:250]
 
@@ -57,6 +72,7 @@ def create_yml_file(categories, products):
     tree = ET.ElementTree(yml_catalog)
     xml_string = ET.tostring(tree.getroot(), encoding='utf-8')
     response = HttpResponse(content_type='application/force-download')
-    response['Content-Disposition'] = 'attachment; filename="feed.xml"'
+    response[
+        'Content-Disposition'] = 'attachment; filename="ya_business_feed.xml"'
     response.write(xml_string.decode())
     return response
