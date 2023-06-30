@@ -37,7 +37,7 @@ SECRET_KEY = MY_SECRET_KEY
 DEBUG = bool(int(MY_DEBUG))
 
 ALLOWED_HOSTS = ["*"]
-CSRF_TRUSTED_ORIGINS = MY_CSRF_TRUSTED_ORIGINS.split(' ')
+CSRF_TRUSTED_ORIGINS = MY_CSRF_TRUSTED_ORIGINS.split(" ")
 
 # Application definition
 
@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "categories",
     "orders",
+    "news",
 ]
 
 MIDDLEWARE = [
@@ -72,11 +73,11 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
 ]
 
-CORS_ALLOWED_ORIGINS = MY_CORS_ALLOWED_ORIGINS.split(' ')
+CORS_ALLOWED_ORIGINS = MY_CORS_ALLOWED_ORIGINS.split(" ")
 
 ROOT_URLCONF = "core.urls"
 
-TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
+TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 
 TEMPLATES = [
     {
@@ -101,27 +102,23 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 import dj_database_url
 
-DATABASES = {'default': dj_database_url.config(default=DATABASE_URL)}
+DATABASES = {"default": dj_database_url.config(default=DATABASE_URL)}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME":
-        "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        "NAME":
-        "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        "NAME":
-        "django.contrib.auth.password_validation.CommonPasswordValidator",
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        "NAME":
-        "django.contrib.auth.password_validation.NumericPasswordValidator",
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -146,10 +143,10 @@ EMAIL_USE_TLS = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = '/var/www/static'
-MEDIA_URL = '/media/'
-MEDIA_ROOT = '/var/www/media'
+STATIC_URL = "/static/"
+STATIC_ROOT = "/var/www/static"
+MEDIA_URL = "/media/"
+MEDIA_ROOT = "/var/www/media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -160,8 +157,9 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly",
     ],
-    "DEFAULT_AUTHENTICATION_CLASSES":
-    ("rest_framework.authentication.TokenAuthentication", ),
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
+    ),
 }
 
 DOMAIN = FRONT_DOMAIN
@@ -185,9 +183,9 @@ DJOSER = {
         "user_delete": "djoser.serializers.UserDeleteSerializer",
         "current_user": "accounts.serializers.CurrentUserSerializer",
     },
-    'EMAIL': {
-        'activation': 'core.email.ActivationEmail',
-        'password_reset': 'core.email.PasswordResetEmail',
+    "EMAIL": {
+        "activation": "core.email.ActivationEmail",
+        "password_reset": "core.email.PasswordResetEmail",
     },
 }
 
