@@ -1,33 +1,30 @@
-from rest_framework import generics, status
-
-from categories.models import Category
-from django.http import Http404
+from django_filters import rest_framework as filters
+from rest_framework import generics
 
 from .models import Product
 from .serializers import ProductSerializer
+from django.db.models import Q
+
+
+class ProductListFilter(filters.FilterSet):
+    title = filters.CharFilter(method="filter_with_or")
+    category = filters.CharFilter(method="filter_with_or")
+
+    class Meta:
+        model = Product
+        fields = ["is_popular"]
+
+    def filter_with_or(self, queryset, name, value):
+        return queryset.filter(
+            Q(title__icontains=value) | Q(category__name__icontains=value)
+        )
 
 
 class ProductListView(generics.ListAPIView):
+    queryset = Product.objects.all()
+    filter_backends = (filters.DjangoFilterBackend,)
     serializer_class = ProductSerializer
-
-    def get_queryset(self):
-        category = self.request.GET.get("category", None)
-        if category is not None:
-            available_categories = []
-            try:
-                current_category = Category.objects.get(slug=category)
-                available_categories.append(current_category)
-                if current_category.parent is None:
-                    child_categories = Category.objects.filter(
-                        parent=current_category.id)
-                    for category in child_categories:
-                        available_categories.append(category)
-            except:
-                raise Http404("Страница не найдена")
-            return Product.objects.filter(category__in=available_categories)
-
-        else:
-            return Product.objects.all()
+    filterset_class = ProductListFilter
 
 
 class SingleProduct(generics.RetrieveAPIView):

@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "categories",
     "orders",
     "news",
+    "django_filters",
 ]
 
 MIDDLEWARE = [

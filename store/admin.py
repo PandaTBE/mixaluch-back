@@ -12,6 +12,7 @@ from .models import (
     ProductSpecificationValue,
     ProductType,
 )
+
 """
 для одновременного заполнения типа продукта и спецификации используем inline
 """
@@ -44,8 +45,8 @@ class ProductAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = super().get_urls()
         my_urls = [
-            path('product-feed-ya-business/', self.ya_business_feed),
-            path('product-feed-ya-webmaster/', self.ya_webmaster_feed),
+            path("product-feed-ya-business/", self.ya_business_feed),
+            path("product-feed-ya-webmaster/", self.ya_webmaster_feed),
         ]
         return my_urls + urls
 
