@@ -38,7 +38,7 @@ def change_price_by_evotor(products: List[models.Product]):
 
                 stores_by_id[store_uuid] = products_by_id
 
-        if len(stores_by_id.keys):
+        if len(stores_by_id.keys()):
             # Итерация во всем товарам и поиск тех, у которых есть ссылка на товар эвотора
             for product in products:
                 serialized_product = serializers.ProductSerializer(product).data
@@ -71,8 +71,4 @@ def change_price_by_evotor(products: List[models.Product]):
 
             return HttpResponse("Цены обновлены!")
 
-    return HttpResponse(
-        f"Не удалось получить информацию от Эвотор. {all_stores_response.text}"
-    )
-
-    return HttpResponse(result)
+    return HttpResponse(f"Не удалось получить информацию от Эвотор.")
