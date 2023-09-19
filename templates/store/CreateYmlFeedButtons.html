@@ -1,16 +1,23 @@
 {% extends 'admin/change_list.html' %}
 
 {% block object-tools %}
-    <div style="display: flex; gap: 10px">
-        <form action="product-feed-ya-business/" method="POST">
-            {% csrf_token %}
+    <div>
+        <div style="display: flex; gap: 10px">
+            <form action="product-feed-ya-business/" method="POST">
+                {% csrf_token %}
                 <input type="submit" value="Фид для Я.Бизнес"/>
-        </form>
-        <form action="product-feed-ya-webmaster/" method="POST">
-            {% csrf_token %}
+            </form>
+            <form action="product-feed-ya-webmaster/" method="POST">
+                {% csrf_token %}
                 <input type="submit" value="Фид для Я.Вебмастер"/>
-        </form>
+            </form>
+            <form action="change-price-by-evotor/" method="POST">
+                {% csrf_token %}
+                <input type="submit" value="Обновить цены, используя эвотор"/>
+            </form>
+        </div>  
     </div>
+
     <br />
     {{ block.super }}
 {% endblock %}
