@@ -6,9 +6,14 @@ from .serializers import ProductSerializer
 from django.db.models import Q
 
 
+class NumberArrayFilter(filters.BaseInFilter, filters.NumberFilter):
+    pass
+
+
 class ProductListFilter(filters.FilterSet):
     title = filters.CharFilter(method="filter_with_or")
     category = filters.CharFilter(method="filter_with_or")
+    id = NumberArrayFilter(field_name="id", lookup_expr="in")
 
     class Meta:
         model = Product
