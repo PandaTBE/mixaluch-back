@@ -37,4 +37,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "unit",
             "min_quantity",
             "external_ids",
+            "is_popular",
+            "slug",
+            "discount_price",
         ]

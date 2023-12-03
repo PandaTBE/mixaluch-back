@@ -1,4 +1,4 @@
-from tabnanny import verbose
+from collections.abc import Iterable
 
 from categories.models import Category
 from django.db import models
@@ -57,7 +57,9 @@ class Product(models.Model):
     таблица продуктов содержит все продукты
     """
 
-    product_type = models.ForeignKey(ProductType, on_delete=models.RESTRICT)
+    product_type = models.ForeignKey(
+        ProductType, on_delete=models.RESTRICT, blank=True, null=True, default=None
+    )
     category = models.ForeignKey(Category, on_delete=models.RESTRICT)
     title = models.CharField(
         verbose_name=_("Title"),
