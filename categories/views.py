@@ -11,5 +11,5 @@ class CategoryListView(generics.ListAPIView):
 
 
 class MainCategoriesListView(generics.ListAPIView):
-    queryset = Category.objects.filter(parent=None)
+    queryset = Category.objects.filter(is_main=True)
     serializer_class = CategorySerializer
