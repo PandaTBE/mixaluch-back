@@ -6,7 +6,6 @@ services:
     command: gunicorn core.wsgi:application -b :8000
     ports:
       - "8080:8000"
-    image: mixaluch-back
     volumes:
       - ../persistentdata/static:/var/www/static
       - ../persistentdata/media:/var/www/media     
