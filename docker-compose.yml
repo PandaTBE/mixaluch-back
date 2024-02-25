@@ -3,8 +3,6 @@ version: "3.9"
 services:
   backend:
     restart: always
-    build:
-      context: ./mixaluch-back
     command: gunicorn core.wsgi:application -b :8000
     ports:
       - "8080:8000"
