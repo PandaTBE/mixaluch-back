@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  backend:
+    restart: always
+    build:
+      context: ./mixaluch-back
+    depends_on:
+      - postgresql-db
+    command: gunicorn core.wsgi:application -b :8000
+    ports:
+      - "8080:8000"
+    image: mixaluch-back
+    volumes:
+      - ./persistentdata/static:/var/www/static
+      - ./persistentdata/media:/var/www/media     

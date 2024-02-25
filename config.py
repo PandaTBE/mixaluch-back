@@ -14,15 +14,15 @@ FRONT_PROTOCOL = os.getenv("FRONT_PROTOCOL")
 TELEGRAM_BOT_API_KEY = os.getenv("TELEGRAM_BOT_API_KEY")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-BD_NAME = os.getenv("BD_NAME")
-BD_USER = os.getenv("BD_USER")
-BD_PASSWORD = os.getenv("BD_PASSWORD")
-BD_HOST = os.getenv("BD_HOST")
+DB_NAME = os.getenv("DB_NAME")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST")
 
 MY_EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 MY_EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
-DATABASE_URL = f"postgres://{BD_USER}:{BD_PASSWORD}@{BD_HOST}:5432/{BD_NAME}"
+DATABASE_URL = f"postgres://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:5432/{DB_NAME}"
 
 MY_DEBUG = os.getenv("DEBUG")
 

@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  nginx:
+    restart: always
+    build:
+      context: ./nginx
+    ports:
+      - "8080:80" # port exposed to outside world.
+    depends_on:
+      - backend
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+    volumes:
+      - ./persistentdata/static:/var/www/static
+      - ./persistentdata/media:/var/www/media
+
+  backend:
+    restart: always
+    build:
+      context: ./mixaluch-back
+    depends_on:
+      - postgresql-db
+    command: python manage.py runserver 0.0.0.0:8000
+    image: mixaluch-back
+    volumes:
+      - ./mixaluch-back/:/app
+      - ./persistentdata/static:/var/www/static
+      - ./persistentdata/media:/var/www/media
+
+  postgresql-db:
+    restart: always
+    image: postgres
+    volumes:
+      - ./persistentdata/db:/var/lib/postgresql/data
+    env_file:
+      - ./postgresql-db/.pg-env
