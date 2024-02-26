@@ -6,7 +6,7 @@ services:
     build: .
     command: gunicorn core.wsgi:application -b :8080
     ports:
-      - "8080:8000"
+      - "8080:8080"
     volumes:
       - ../persistentdata/static:/var/www/static
       - ../persistentdata/media:/var/www/media     
