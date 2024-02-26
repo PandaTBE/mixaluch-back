@@ -8,5 +8,5 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ~/var/www/persistentdata/static:/var/www/static
-      - ~/var/www/persistentdata/media:/var/www/media     
+      - /var/www/persistentdata/static:/var/www/static
+      - /var/www/persistentdata/media:/var/www/media     
