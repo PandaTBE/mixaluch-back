@@ -4,7 +4,7 @@ services:
   backend:
     restart: always
     build: .
-    command: gunicorn core.wsgi:application -b :8000
+    command: gunicorn core.wsgi:application -b :8080
     ports:
       - "8080:8000"
     volumes:
