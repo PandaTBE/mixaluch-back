@@ -1,0 +1,23 @@
+name: deploy dev
+
+on:
+    push:
+        branches:
+            - dev
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        concurrency:
+            group: dev
+            cancel-in-progress: true
+        steps:
+            - name: SSH Command
+              uses: D3rHase/ssh-command-action@v0.2.2
+              with:
+                  # hostname / IP of the server
+                  host: ${{ secrets.DEV_SSH_HOST }}
+                  user: ${{ secrets.DEV_SSH_USERNAME }}
+                  private_key: ${{ secrets.DEV_SSH_PRIVATE_KEY }}
+                  host_fingerprint: ${{ secrets.DEV_SSH_FINGERPRINT }}
+                  command: source ~/.nvm/nvm.sh; ~/deploy-back.sh
