@@ -3,14 +3,14 @@ import math
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
-from store.models import PRODUCT_UNIT_MAP
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from cart.models import CartItem
 from core import settings
 from orders.management.commands.bot import message_handler
+from store.models import PRODUCT_UNIT_MAP
 
-# Create your models here.
+DEFAULT_DELIVERY_DATE = "AS_SOON_AS_POSSIBLE"
 
 
 class OrderStatus(models.TextChoices):
@@ -38,10 +38,7 @@ class DeliveryType(models.TextChoices):
     COURIER_DELIVERY = "COURIER_DELIVERY", "Курьером"
 
 
-DELIVERY_TYPE_NAMES_MAP = {
-    "SELF_DELIVERY": "Самовывоз",
-    "COURIER_DELIVERY": "Курьером"
-}
+DELIVERY_TYPE_NAMES_MAP = {"SELF_DELIVERY": "Самовывоз", "COURIER_DELIVERY": "Курьером"}
 
 
 class PaymentType(models.TextChoices):
@@ -56,24 +53,29 @@ PAYMENT_TYPE_NAMES_MAP = {
 
 
 class Order(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,
-                             on_delete=models.SET_NULL,
-                             null=True,
-                             blank=True,
-                             default=None)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=None,
+    )
     name = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=30, null=False, blank=False)
-    status = models.CharField(max_length=30,
-                              choices=OrderStatus.choices,
-                              default=OrderStatus.IN_PROCESS)
+    status = models.CharField(
+        max_length=30, choices=OrderStatus.choices, default=OrderStatus.IN_PROCESS
+    )
     comment = models.CharField(blank=True, default="", max_length=3000)
     address = models.CharField(blank=True, default="", max_length=1000)
-    delivery_type = models.CharField(max_length=50,
-                                     choices=DeliveryType.choices,
-                                     default=DeliveryType.COURIER_DELIVERY)
-    payment_type = models.CharField(max_length=50,
-                                    choices=PaymentType.choices,
-                                    default=PaymentType.CARD_PAYMENT)
+    delivery_type = models.CharField(
+        max_length=50,
+        choices=DeliveryType.choices,
+        default=DeliveryType.COURIER_DELIVERY,
+    )
+    payment_type = models.CharField(
+        max_length=50, choices=PaymentType.choices, default=PaymentType.CARD_PAYMENT
+    )
+    delivery_date = models.CharField(max_length=64, default=DEFAULT_DELIVERY_DATE)
     order_data = models.JSONField(default=dict)
     delivery_cost = models.PositiveIntegerField(default=0)
     total_sum = models.PositiveIntegerField(default=0)
@@ -129,8 +131,8 @@ def format_order_products(products):
 
     result = "\n"
     for product in products:
-        unit = product['product'].get('unit', '')
-        translated_unit = PRODUCT_UNIT_MAP.get(unit, '')
+        unit = product["product"].get("unit", "")
+        translated_unit = PRODUCT_UNIT_MAP.get(unit, "")
         value = f"\
 {tab}{format_title('Товар')}   {product['product']['title']}{new_line}\
 {tab}{format_title('Цена')}    {product['product']['regular_price']} руб.{new_line}\
@@ -157,25 +159,30 @@ def gen_markup(order_id):
         InlineKeyboardButton(
             "В обработке",
             callback_data=f"{order_id},IN_PROCESS",
-        ))
+        )
+    )
     markup.add(
         InlineKeyboardButton(
             "Принят",
             callback_data=f"{order_id},ACCEPTED",
-        ))
+        )
+    )
     markup.add(
         InlineKeyboardButton(
             "Собран",
             callback_data=f"{order_id},COLLECTED",
-        ))
+        )
+    )
     markup.add(
         InlineKeyboardButton(
             "В доставке",
             callback_data=f"{order_id},IN_DELIVERY",
-        ))
+        )
+    )
     markup.add(
         InlineKeyboardButton(
             "Выполнен",
             callback_data=f"{order_id},COMPLETED",
-        ), )
+        ),
+    )
     return markup
