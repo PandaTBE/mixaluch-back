@@ -1,3 +1,4 @@
+import datetime
 import math
 
 from django.db import models
@@ -101,7 +102,7 @@ def clear_cart(sender, instance, **kwargs):
 @receiver(post_save, sender=Order)
 def correct_price(sender, instance, created, **kwargs):
     """
-    Сигнал срабатывает после сохранении CartItem. Отправляет сообщение в телеграмм
+    Сигнал срабатывает после сохранении Order. Отправляет сообщение в телеграмм
     """
     if created:
         message_handler(create_message(instance), gen_markup(instance.id))
@@ -119,11 +120,21 @@ def create_message(instance):
 {format_order_data('Телефон', instance.phone_number)}\
 {format_order_data('Тип доставки', DELIVERY_TYPE_NAMES_MAP.get(instance.delivery_type, '?'))}\
 {format_order_data('Адрес доставки', instance.address)}\
+{format_order_data('Дата и время доставки', format_delivery_date(instance.delivery_date))}\
 {format_order_data('Расчет', PAYMENT_TYPE_NAMES_MAP.get(instance.payment_type, '?'))}\
 {format_order_data('Комментарий', instance.comment)}\
 {format_order_data('Стоимость доставки', f'{instance.delivery_cost} руб.')}\
 {format_order_data('Итого', f'{instance.total_sum_with_delivery} руб.')}\
 {format_order_data('Заказ', format_order_products(instance.order_data.get('products', [])))}"
+
+
+def format_delivery_date(delivery_date):
+    try:
+        datetime_obj = datetime.datetime.strptime(delivery_date, "%Y-%m-%dT%H:%M.%f%z")
+        datetime_str = datetime_obj.strftime("%d-%m-%Y %H:%M %z")
+        return datetime_str
+    except ValueError:
+        return "Как можно скорее"
 
 
 def format_order_products(products):
