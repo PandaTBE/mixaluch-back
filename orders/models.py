@@ -130,8 +130,8 @@ def create_message(instance):
 
 def format_delivery_date(delivery_date):
     try:
-        datetime_obj = datetime.datetime.strptime(delivery_date, "%Y-%m-%dT%H:%M.%f%z")
-        datetime_str = datetime_obj.strftime("%d-%m-%Y %H:%M %z")
+        datetime_obj = datetime.datetime.fromisoformat(delivery_date)
+        datetime_str = datetime_obj.strftime("%d-%m-%Y %H:%M %Z")
         return datetime_str
     except ValueError:
         return "Как можно скорее"
