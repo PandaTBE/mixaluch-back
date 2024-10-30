@@ -17,7 +17,7 @@ services:
 
   db:
     restart: always
-    image: postgres
+    image: postgres:16
     volumes:
       - ./persistentdata/db:/var/lib/postgresql/data
     environment:

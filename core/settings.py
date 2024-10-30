@@ -14,14 +14,14 @@ import os
 from pathlib import Path
 
 from config import (
+    DATABASE_URL,
     FRONT_DOMAIN,
+    MY_CORS_ALLOWED_ORIGINS,
+    MY_CSRF_TRUSTED_ORIGINS,
+    MY_DEBUG,
     MY_EMAIL_HOST_PASSWORD,
     MY_EMAIL_HOST_USER,
     MY_SECRET_KEY,
-    DATABASE_URL,
-    MY_DEBUG,
-    MY_CSRF_TRUSTED_ORIGINS,
-    MY_CORS_ALLOWED_ORIGINS,
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -135,11 +135,14 @@ USE_I18N = True
 USE_TZ = True
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
+EMAIL_HOST = "smtp.yandex.ru"
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
 EMAIL_HOST_USER = MY_EMAIL_HOST_USER
 EMAIL_HOST_PASSWORD = MY_EMAIL_HOST_PASSWORD
-EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+SERVER_EMAIL = EMAIL_HOST_USER
+EMAIL_ADMIN = EMAIL_HOST_USER
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
