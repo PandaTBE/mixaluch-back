@@ -14,6 +14,8 @@ services:
       - .:/app
       - ./persistentdata/static:/var/www/static
       - ./persistentdata/media:/var/www/media
+    env_file:
+      - .env   
 
   db:
     restart: always
