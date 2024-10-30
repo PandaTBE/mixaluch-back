@@ -4,11 +4,9 @@ services:
   backend:
     restart: always
     build: .
-    command: python manage.py runserver 0.0.0.0:8080
+    command: gunicorn core.wsgi:application -b :8080
     ports:
       - "8080:8080"
     volumes:
       - /var/www/persistentdata/static:/var/www/static
-      - /var/www/persistentdata/media:/var/www/media  
-    env_file:
-      - .env   
+      - /var/www/persistentdata/media:/var/www/media     
