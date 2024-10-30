@@ -7,9 +7,9 @@ services:
       context: .
     depends_on:
       - db
-    command: python manage.py runserver 0.0.0.0:8080
+    command: python manage.py runserver 0.0.0.0:8000
     ports:
-      - "8080:8080"
+      - "8000:8000"
     volumes:
       - .:/app
       - ./persistentdata/static:/var/www/static
