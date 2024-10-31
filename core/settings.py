@@ -191,13 +191,3 @@ DJOSER = {
 }
 
 AUTH_USER_MODEL = "accounts.UserAccount"
-
-from django.core.mail import send_mail
-
-send_mail(
-    "Test Email Subject",
-    "Test email body.",
-    MY_EMAIL_HOST_USER,
-    ["surov.n2012@gmail.com"],
-    fail_silently=False,
-)
