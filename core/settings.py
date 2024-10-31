@@ -190,3 +190,15 @@ DJOSER = {
 }
 
 AUTH_USER_MODEL = "accounts.UserAccount"
+
+
+import smtplib
+
+try:
+    server = smtplib.SMTP_SSL("smtp.gmail.com", 587)
+    server.login(MY_EMAIL_HOST_USER, MY_EMAIL_HOST_PASSWORD)
+    server.sendmail(MY_EMAIL_HOST_USER, "surov.n2012@gmail.com", "Test email body")
+    server.quit()
+    print("Email sent successfully")
+except Exception as e:
+    print("Error:", e)
