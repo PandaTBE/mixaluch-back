@@ -136,11 +136,11 @@ USE_TZ = True
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 465
+EMAIL_PORT = 587
 EMAIL_HOST_USER = MY_EMAIL_HOST_USER
 EMAIL_HOST_PASSWORD = MY_EMAIL_HOST_PASSWORD
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = True
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
@@ -192,14 +192,12 @@ DJOSER = {
 
 AUTH_USER_MODEL = "accounts.UserAccount"
 
+from django.core.mail import send_mail
 
-import smtplib
-
-try:
-    server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
-    server.login(MY_EMAIL_HOST_USER, MY_EMAIL_HOST_PASSWORD)
-    server.sendmail(MY_EMAIL_HOST_USER, "surov.n2012@gmail.com", "Test email body")
-    server.quit()
-    print("Email sent successfully")
-except Exception as e:
-    print("Error:", e)
+send_mail(
+    "Test Email Subject",
+    "Test email body.",
+    MY_EMAIL_HOST_USER,
+    ["surov.n2012@gmail.com"],
+    fail_silently=False,
+)
