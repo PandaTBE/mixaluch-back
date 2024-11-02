@@ -12,6 +12,4 @@ services:
       - .:/app
       - /var/www/persistentdata/static:/var/www/static
       - /var/www/persistentdata/media:/var/www/media   
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4  
+    network_mode: "host"
