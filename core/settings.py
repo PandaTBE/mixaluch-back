@@ -134,13 +134,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-# Email configuration
-if DEBUG:
-    # В режиме отладки выводим email в консоль
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-else:
-    # В продакшене используем SMTP с fallback на консоль
-    EMAIL_BACKEND = "core.email_backend.FallbackEmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 EMAIL_HOST = "smtp.yandex.ru"
 # EMAIL_PORT = 587
@@ -211,48 +205,3 @@ DJOSER = {
 }
 
 AUTH_USER_MODEL = "accounts.UserAccount"
-
-# Logging configuration для отладки email
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
-            "style": "{",
-        },
-    },
-    "handlers": {
-        "console": {
-            "level": "DEBUG",
-            "class": "logging.StreamHandler",
-            "formatter": "verbose",
-        },
-    },
-    "root": {
-        "handlers": ["console"],
-        "level": "INFO",
-    },
-    "loggers": {
-        "django.core.mail": {
-            "handlers": ["console"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
-        "core.email_backend": {
-            "handlers": ["console"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
-        "store.admin": {
-            "handlers": ["console"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
-        "djoser": {
-            "handlers": ["console"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
-    },
-}
