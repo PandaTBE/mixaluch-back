@@ -134,14 +134,16 @@ USE_I18N = True
 
 USE_TZ = True
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# Временно используем консольный backend для отладки
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 EMAIL_HOST = "smtp.yandex.ru"
 # EMAIL_PORT = 587
 # EMAIL_USE_TLS = True
 
-EMAIL_PORT = 465
-EMAIL_USE_SSL = True
+EMAIL_POST = 587
+EMAIL_USE_TLS = True
 
 EMAIL_HOST_USER = MY_EMAIL_HOST_USER
 EMAIL_HOST_PASSWORD = MY_EMAIL_HOST_PASSWORD
@@ -205,3 +207,25 @@ DJOSER = {
 }
 
 AUTH_USER_MODEL = "accounts.UserAccount"
+
+# Базовое логирование
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "django.core.mail": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}
