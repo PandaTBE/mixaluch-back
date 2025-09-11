@@ -15,6 +15,10 @@
                 {% csrf_token %}
                 <input type="submit" value="Обновить цены, используя эвотор"/>
             </form>
+            <form action="test-email/" method="POST">
+                {% csrf_token %}
+                <input type="submit" value="Тестовое письмо" style="background-color: #28a745; color: white;"/>
+            </form>
         </div>  
     </div>
 

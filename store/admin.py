@@ -1,18 +1,21 @@
-from categories.models import Category
-from django.contrib import admin
+from django.conf import settings
+from django.contrib import admin, messages
+from django.core.mail import send_mail
+from django.http import HttpResponse
 from django.urls import path
+
+from categories.models import Category
+from store.tools.change_price_by_evotor import change_price_by_evotor
 from store.tools.get_ya_business_feed import get_ya_business_feed
 from store.tools.get_ya_webmaster_feed import get_ya_webmaster_feed
-from store.tools.change_price_by_evotor import change_price_by_evotor
-
 
 from .models import (
     Product,
+    ProductExternalId,
     ProductImage,
     ProductSpecification,
     ProductSpecificationValue,
     ProductType,
-    ProductExternalId,
 )
 
 """
@@ -58,6 +61,7 @@ class ProductAdmin(admin.ModelAdmin):
             path("change-price-by-evotor/", self.price_by_evotor),
             path("product-feed-ya-business/", self.ya_business_feed),
             path("product-feed-ya-webmaster/", self.ya_webmaster_feed),
+            path("test-email/", self.test_email),
         ]
         return my_urls + urls
 
@@ -86,3 +90,24 @@ class ProductAdmin(admin.ModelAdmin):
         products = Product.objects.all().values()
         response = get_ya_webmaster_feed(categories, products)
         return response
+
+    def test_email(self, request):
+        """
+        Тестовая отправка email для проверки настроек
+        """
+        try:
+            send_mail(
+                "Тестовое письмо от Django",
+                "Это тестовое сообщение для проверки работы email на сервере.",
+                settings.EMAIL_HOST_USER,
+                [settings.EMAIL_HOST_USER],  # Отправляем себе
+                fail_silently=False,
+            )
+            messages.success(request, "Тестовое письмо успешно отправлено!")
+        except Exception as e:
+            messages.error(request, f"Ошибка отправки email: {str(e)}")
+
+        # Возвращаемся на страницу со списком продуктов
+        from django.shortcuts import redirect
+
+        return redirect("admin:store_product_changelist")
