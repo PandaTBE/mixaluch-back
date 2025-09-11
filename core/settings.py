@@ -135,14 +135,15 @@ USE_I18N = True
 USE_TZ = True
 
 # Временно используем консольный backend для отладки
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# Используем fallback backend - попытка SMTP, при ошибке консоль
+EMAIL_BACKEND = "core.email_backend.FallbackEmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 EMAIL_HOST = "smtp.yandex.ru"
 # EMAIL_PORT = 587
 # EMAIL_USE_TLS = True
 
-EMAIL_POST = 587
+EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
 EMAIL_HOST_USER = MY_EMAIL_HOST_USER
