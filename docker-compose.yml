@@ -5,7 +5,7 @@ services:
     restart: always
     build:
       context: .
-    command: gunicorn core.wsgi:application -b 0.0.0.0:8080
+    command: gunicorn core.wsgi:application -b 0.0.0.0:8080 --timeout 120 --workers 3 --max-requests 1000 --max-requests-jitter 100
     ports:
       - "8080:8080"
     volumes:
