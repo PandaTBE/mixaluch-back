@@ -5,11 +5,9 @@ services:
     restart: always
     build:
       context: .
-    # command: gunicorn core.wsgi:application -b :8080
-    command: python manage.py runserver 0.0.0.0:8080
+    command: gunicorn core.wsgi:application -b 0.0.0.0:8080
     ports:
       - "8080:8080"
     volumes:
       - /var/www/persistentdata/static:/var/www/static
-      - /var/www/persistentdata/media:/var/www/media   
-    network_mode: "host"
+      - /var/www/persistentdata/media:/var/www/media
