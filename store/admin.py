@@ -95,6 +95,8 @@ class ProductAdmin(admin.ModelAdmin):
         """
         Тестовая отправка email для проверки настроек
         """
+        from django.http import JsonResponse
+
         try:
             send_mail(
                 "Тестовое письмо от Django",
@@ -103,11 +105,10 @@ class ProductAdmin(admin.ModelAdmin):
                 [settings.EMAIL_HOST_USER],  # Отправляем себе
                 fail_silently=False,
             )
-            messages.success(request, "Тестовое письмо успешно отправлено!")
+            return JsonResponse(
+                {"success": True, "message": "Тестовое письмо успешно отправлено!"}
+            )
         except Exception as e:
-            messages.error(request, f"Ошибка отправки email: {str(e)}")
-
-        # Возвращаемся на страницу со списком продуктов
-        from django.shortcuts import redirect
-
-        return redirect("admin:store_product_changelist")
+            return JsonResponse(
+                {"success": False, "message": f"Ошибка отправки email: {str(e)}"}
+            )

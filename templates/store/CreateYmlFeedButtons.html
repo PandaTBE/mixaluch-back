@@ -15,13 +15,75 @@
                 {% csrf_token %}
                 <input type="submit" value="Обновить цены, используя эвотор"/>
             </form>
-            <form action="test-email/" method="POST">
-                {% csrf_token %}
-                <input type="submit" value="Тестовое письмо" style="background-color: #28a745; color: white;"/>
-            </form>
+            <button id="test-email-btn" type="button" style="background-color: #28a745; color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 4px;">
+                Тестовое письмо
+            </button>
         </div>  
     </div>
 
+    <!-- Сообщения -->
+    <div id="email-message" style="margin-top: 10px; padding: 10px; border-radius: 4px; display: none;"></div>
+
     <br />
     {{ block.super }}
+{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const testEmailBtn = document.getElementById('test-email-btn');
+        const messageDiv = document.getElementById('email-message');
+        
+        testEmailBtn.addEventListener('click', function() {
+            // Отключаем кнопку и показываем загрузку
+            testEmailBtn.disabled = true;
+            testEmailBtn.textContent = 'Отправка...';
+            
+            // Получаем CSRF токен
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            fetch('test-email/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Показываем сообщение
+                messageDiv.style.display = 'block';
+                messageDiv.textContent = data.message;
+                
+                if (data.success) {
+                    messageDiv.style.backgroundColor = '#d4edda';
+                    messageDiv.style.color = '#155724';
+                    messageDiv.style.border = '1px solid #c3e6cb';
+                } else {
+                    messageDiv.style.backgroundColor = '#f8d7da';
+                    messageDiv.style.color = '#721c24';
+                    messageDiv.style.border = '1px solid #f5c6cb';
+                }
+                
+                // Скрываем сообщение через 5 секунд
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 5000);
+            })
+            .catch(error => {
+                messageDiv.style.display = 'block';
+                messageDiv.textContent = 'Произошла ошибка при отправке запроса';
+                messageDiv.style.backgroundColor = '#f8d7da';
+                messageDiv.style.color = '#721c24';
+                messageDiv.style.border = '1px solid #f5c6cb';
+            })
+            .finally(() => {
+                // Возвращаем кнопку в исходное состояние
+                testEmailBtn.disabled = false;
+                testEmailBtn.textContent = 'Тестовое письмо';
+            });
+        });
+    });
+    </script>
 {% endblock %}
