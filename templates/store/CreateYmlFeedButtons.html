@@ -40,17 +40,18 @@
             testEmailBtn.disabled = true;
             testEmailBtn.textContent = 'Отправка...';
             
-            // Получаем CSRF токен
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-            
             fetch('test-email/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken,
                 },
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 // Показываем сообщение
                 messageDiv.style.display = 'block';
@@ -72,8 +73,9 @@
                 }, 5000);
             })
             .catch(error => {
+                console.error('Error:', error);
                 messageDiv.style.display = 'block';
-                messageDiv.textContent = 'Произошла ошибка при отправке запроса';
+                messageDiv.textContent = 'Произошла ошибка при отправке запроса: ' + error.message;
                 messageDiv.style.backgroundColor = '#f8d7da';
                 messageDiv.style.color = '#721c24';
                 messageDiv.style.border = '1px solid #f5c6cb';

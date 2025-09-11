@@ -1,8 +1,12 @@
+import logging
+
 from django.conf import settings
 from django.contrib import admin, messages
 from django.core.mail import send_mail
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.urls import path
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 
 from categories.models import Category
 from store.tools.change_price_by_evotor import change_price_by_evotor
@@ -17,6 +21,8 @@ from .models import (
     ProductSpecificationValue,
     ProductType,
 )
+
+logger = logging.getLogger(__name__)
 
 """
 для одновременного заполнения типа продукта и спецификации используем inline
@@ -91,24 +97,34 @@ class ProductAdmin(admin.ModelAdmin):
         response = get_ya_webmaster_feed(categories, products)
         return response
 
+    @method_decorator(csrf_exempt)
     def test_email(self, request):
         """
         Тестовая отправка email для проверки настроек
         """
-        from django.http import JsonResponse
-
         try:
+            logger.info("Начинаем отправку тестового email")
+
+            if not settings.EMAIL_HOST_USER:
+                return JsonResponse(
+                    {"success": False, "message": "EMAIL_HOST_USER не настроен"}
+                )
+
             send_mail(
-                "Тестовое письмо от Django",
-                "Это тестовое сообщение для проверки работы email на сервере.",
-                settings.EMAIL_HOST_USER,
-                [settings.EMAIL_HOST_USER],  # Отправляем себе
+                subject="Тестовое письмо от Django",
+                message="Это тестовое сообщение для проверки работы email на сервере.",
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[settings.EMAIL_HOST_USER],
                 fail_silently=False,
             )
+
+            logger.info("Тестовый email успешно отправлен")
             return JsonResponse(
                 {"success": True, "message": "Тестовое письмо успешно отправлено!"}
             )
+
         except Exception as e:
+            logger.error(f"Ошибка отправки тестового email: {str(e)}")
             return JsonResponse(
                 {"success": False, "message": f"Ошибка отправки email: {str(e)}"}
             )
