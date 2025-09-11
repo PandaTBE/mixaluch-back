@@ -137,19 +137,20 @@ USE_TZ = True
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 EMAIL_HOST = "smtp.yandex.ru"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
 
-# EMAIL_PORT = 465
-# EMAIL_USE_SSL = True
-# EMAIL_USE_TLS = False
-
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
 
 EMAIL_HOST_USER = MY_EMAIL_HOST_USER
 EMAIL_HOST_PASSWORD = MY_EMAIL_HOST_PASSWORD
 
 # Email timeout settings для предотвращения зависания
-EMAIL_TIMEOUT = 60
+EMAIL_TIMEOUT = 30
+# Дополнительные настройки для стабильности SMTP
+EMAIL_SSL_KEYFILE = None
+EMAIL_SSL_CERTFILE = None
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 SERVER_EMAIL = EMAIL_HOST_USER
