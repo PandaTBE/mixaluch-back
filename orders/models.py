@@ -8,7 +8,6 @@ from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from cart.models import CartItem
 from core import settings
-from orders.management.commands.bot import message_handler
 from store.models import PRODUCT_UNIT_MAP
 
 DEFAULT_DELIVERY_DATE = "AS_SOON_AS_POSSIBLE"
@@ -105,7 +104,8 @@ def correct_price(sender, instance, created, **kwargs):
     Сигнал срабатывает после сохранении Order. Отправляет сообщение в телеграмм
     """
     if created:
-        message_handler(create_message(instance), gen_markup(instance.id))
+        from orders.notifications import send_order_notifications
+        send_order_notifications(instance)
 
 
 new_line = "\n"
