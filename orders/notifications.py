@@ -19,7 +19,11 @@ def send_telegram_notification(instance) -> bool:
         message_handler(create_message(instance), gen_markup(instance.id))
         return True
     except Exception as e:
-        logger.error(f"Ошибка отправки уведомления в Telegram для заказа #{instance.id}: {e}")
+        logger.error(
+            "Ошибка отправки уведомления в Telegram для заказа #%s (%s)",
+            instance.id,
+            type(e).__name__,
+        )
         return False
 
 

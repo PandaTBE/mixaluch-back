@@ -103,7 +103,8 @@ class ProductAdmin(admin.ModelAdmin):
         ProductSpecificationValueInline,
         ProductExternalIdInline,
     ]
-    list_display = ["id", "title"]
+    list_display = ["id", "title", "is_negotiable_price"]
+    list_filter = ["is_negotiable_price"]
 
     def get_urls(self):
         urls = super().get_urls()
