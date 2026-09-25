@@ -1,8 +1,16 @@
 from rest_framework import generics
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import AllowAny, IsAdminUser
 
-from orders.models import Order
-from orders.serializers import OrderSerializer
+from orders.models import Order, OrderingSettings
+from orders.serializers import OrderSerializer, OrderingSettingsSerializer
+
+
+class OrderingSettingsAPIView(generics.RetrieveAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = OrderingSettingsSerializer
+
+    def get_object(self):
+        return OrderingSettings.objects.get_or_create(pk=1)[0]
 
 
 class OrderListCreateAPIView(generics.ListCreateAPIView):

@@ -3,13 +3,19 @@ from decimal import Decimal
 
 from rest_framework import serializers
 
-from orders.models import Order
+from orders.models import DeliveryType, Order, OrderingSettings
 from store.models import Product
 from store.serializers import ProductSerializer
 
 
 class OrderProductReferenceSerializer(serializers.Serializer):
     id = serializers.IntegerField(min_value=1, max_value=9223372036854775807)
+
+
+class OrderingSettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderingSettings
+        fields = ("notice", "self_delivery_enabled", "courier_delivery_enabled")
 
 
 class OrderItemInputSerializer(serializers.Serializer):
@@ -37,6 +43,16 @@ class OrderSerializer(serializers.ModelSerializer):
         # Status updates retain the prices agreed when the order was placed.
         if self.instance is not None:
             return attrs
+        delivery_type = attrs.get(
+            "delivery_type", Order._meta.get_field("delivery_type").get_default()
+        )
+        settings = OrderingSettings.objects.get_or_create(pk=1)[0]
+        if not settings.self_delivery_enabled and not settings.courier_delivery_enabled:
+            raise serializers.ValidationError({"delivery_type": "Оформление заказов временно недоступно."})
+        if delivery_type == DeliveryType.SELF_DELIVERY and not settings.self_delivery_enabled:
+            raise serializers.ValidationError({"delivery_type": "Самовывоз временно недоступен."})
+        if delivery_type == DeliveryType.COURIER_DELIVERY and not settings.courier_delivery_enabled:
+            raise serializers.ValidationError({"delivery_type": "Доставка курьером временно недоступна."})
         order_data = attrs.get("order_data")
         if not isinstance(order_data, dict):
             raise serializers.ValidationError({"order_data": "Укажите товары заказа."})

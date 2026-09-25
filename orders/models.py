@@ -41,6 +41,19 @@ class DeliveryType(models.TextChoices):
 DELIVERY_TYPE_NAMES_MAP = {"SELF_DELIVERY": "Самовывоз", "COURIER_DELIVERY": "Курьером"}
 
 
+class OrderingSettings(models.Model):
+    notice = models.CharField(max_length=500, blank=True, default="")
+    self_delivery_enabled = models.BooleanField(default=True)
+    courier_delivery_enabled = models.BooleanField(default=True)
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return "Настройки оформления заказа"
+
+
 class PaymentType(models.TextChoices):
     CASH_PAYMENT = "CASH_PAYMENT", "Наличными"
     CARD_PAYMENT = "CARD_PAYMENT", "Картой"

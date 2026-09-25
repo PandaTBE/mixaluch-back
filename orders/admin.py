@@ -3,8 +3,19 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import path, reverse
 from django.utils.html import format_html
 
-from orders.models import Order
+from orders.models import Order, OrderingSettings
 from orders.notifications import send_order_notifications
+
+
+@admin.register(OrderingSettings)
+class OrderingSettingsAdmin(admin.ModelAdmin):
+    fieldsets = [(None, {"fields": ("notice", "self_delivery_enabled", "courier_delivery_enabled")})]
+
+    def has_add_permission(self, request):
+        return not OrderingSettings.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(Order)

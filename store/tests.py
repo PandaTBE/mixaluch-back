@@ -12,7 +12,7 @@ from cart.serializers import CartItemSerializer
 from categories.models import Category
 from orders.models import Order, format_order_products
 from orders.notifications import send_telegram_notification
-from store.models import Product
+from store.models import Product, ProductImage
 from store.serializers import ProductSerializer
 from store.tools.get_ya_business_feed import get_ya_business_feed
 from store.tools.get_ya_webmaster_feed import get_ya_webmaster_feed
@@ -157,3 +157,94 @@ class NegotiablePriceTests(TestCase):
             root = ElementTree.fromstring(feed(Category.objects.values(), Product.objects.values()).content)
             offers = root.findall("./shop/offers/offer")
             self.assertEqual([offer.attrib["id"] for offer in offers], [str(ordinary.id)])
+
+
+class ProductListV2Tests(TestCase):
+    url = "/api/v2/products/"
+
+    def setUp(self):
+        self.client = APIClient()
+        self.root = Category.objects.create(name="Мясо", slug="meat")
+        self.child = Category.objects.create(name="Птица", slug="poultry", parent=self.root)
+        self.grandchild = Category.objects.create(name="Индейка", slug="turkey", parent=self.child)
+        self.other = Category.objects.create(name="Овощи", slug="vegetables")
+
+    def product(self, title, category=None, **kwargs):
+        return Product.objects.create(
+            category=category or self.root, title=title,
+            slug=f"product-{Product.objects.count()}", regular_price=100,
+            discount_price=0, **kwargs,
+        )
+
+    def test_category_search_and_hidden_ancestors(self):
+        root = self.product("Говядина")
+        child = self.product("Курица", self.child)
+        grandchild = self.product("Индейка", self.grandchild)
+        other = self.product("Картофель", self.other)
+        hidden = self.product("Скрытый", is_active=False)
+        response = self.client.get(self.url, {"category": self.root.id})
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual({item["id"] for item in response.data["results"]},
+                         {root.id, child.id, grandchild.id})
+        response = self.client.get(self.url, {"category": self.root.id, "search": "  Индей  "})
+        self.assertEqual([item["id"] for item in response.data["results"]], [grandchild.id])
+        self.assertEqual(
+            {item["id"] for item in self.client.get(self.url, {"search": "Птица"}).data["results"]},
+            {child.id},
+        )
+        self.assertEqual(
+            {item["id"] for item in self.client.get(self.url, {"search": "Мясо"}).data["results"]},
+            {root.id, child.id, grandchild.id},
+        )
+        self.assertEqual(self.client.get(self.url, {"search": "Карто"}).data["results"][0]["id"], other.id)
+        self.product("Turkey", self.other)
+        self.assertEqual(self.client.get(self.url, {"search": "tUrK"}).data["count"], 1)
+        self.assertNotIn(hidden.id, [item["id"] for item in self.client.get(self.url).data["results"]])
+        self.child.is_active = False
+        self.child.save()
+        response = self.client.get(self.url)
+        self.assertEqual({item["id"] for item in response.data["results"] if item["title"] != "Turkey"},
+                         {root.id, other.id})
+        self.assertEqual(self.client.get(self.url, {"category": self.child.id}).status_code, 400)
+
+    def test_pagination_is_stable_and_preserves_filters(self):
+        products = [self.product(f"Индейка {i}") for i in range(25)]
+        Product.objects.filter(id__in=[product.id for product in products]).update(
+            created_at=products[0].created_at
+        )
+        response = self.client.get(self.url, {"category": self.root.id, "search": "Индейка"})
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual(response.data["count"], 25)
+        self.assertEqual(len(response.data["results"]), 24)
+        self.assertIsNone(response.data["previous"])
+        self.assertIn("category=", response.data["next"])
+        self.assertIn("search=", response.data["next"])
+        second = self.client.get(response.data["next"])
+        self.assertEqual(second.status_code, 200, second.data)
+        ids = [item["id"] for item in response.data["results"] + second.data["results"]]
+        self.assertEqual(ids, [product.id for product in reversed(products)])
+        self.assertIsNone(second.data["next"])
+        self.assertIsNotNone(second.data["previous"])
+
+    def test_validation_and_legacy_response(self):
+        self.product("Товар")
+        empty = self.client.get(self.url, {"search": "absent"})
+        self.assertEqual(empty.status_code, 200)
+        self.assertEqual(empty.data["results"], [])
+        for params in ({"category": "abc"}, {"category": "0"},
+                       {"category": "999999"}, {"search": "a" * 256}):
+            with self.subTest(params=params):
+                self.assertEqual(self.client.get(self.url, params).status_code, 400)
+        for page in ("0", "wrong", "99"):
+            with self.subTest(page=page):
+                self.assertEqual(self.client.get(self.url, {"page": page}).status_code, 404)
+        self.assertIsInstance(self.client.get("/api/products/").data, list)
+
+    def test_card_contains_one_main_image_without_external_ids(self):
+        product = self.product("Мясо")
+        ProductImage.objects.create(product=product, is_feature=False)
+        main = ProductImage.objects.create(product=product, is_feature=True)
+        item = self.client.get(self.url).data["results"][0]
+        self.assertEqual(item["id"], product.id)
+        self.assertEqual([image["id"] for image in item["product_image"]], [main.id])
+        self.assertNotIn("external_ids", item)
