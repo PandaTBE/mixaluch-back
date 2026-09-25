@@ -24,4 +24,6 @@ def correct_price(sender, instance, **kwargs):
     Сигнал срабатывает при сохранении CartItem
     """
     product = Product.objects.get(id=instance.product.id)
-    instance.total_price = instance.quantity * product.regular_price
+    instance.total_price = (
+        0 if product.is_negotiable_price else instance.quantity * product.regular_price
+    )

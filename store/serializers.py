@@ -33,6 +33,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "description",
             "category",
             "regular_price",
+            "is_negotiable_price",
             "product_image",
             "unit",
             "min_quantity",

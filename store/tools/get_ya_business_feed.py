@@ -45,6 +45,8 @@ def get_ya_business_feed(categories, products):
     # create the offers element
     offers = ET.SubElement(shop, "offers")
     for product in products:
+        if product.get("is_negotiable_price", False):
+            continue
         images = ProductImage.objects.filter(product_id=product["id"]).values()
         main_image = ""
         if images:

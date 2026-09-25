@@ -9,6 +9,13 @@ from .models import *
 
 class CartItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer()
+    total_price = serializers.SerializerMethodField()
+
+    def get_total_price(self, obj):
+        return (
+            0 if obj.product.is_negotiable_price
+            else obj.quantity * obj.product.regular_price
+        )
 
     class Meta:
         model = CartItem

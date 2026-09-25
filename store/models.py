@@ -94,6 +94,9 @@ class Product(models.Model):
         default=True,
     )
     is_popular = models.BooleanField(verbose_name=_("Is popular?"), default=False)
+    is_negotiable_price = models.BooleanField(
+        verbose_name="Договорная цена", default=False
+    )
     created_at = models.DateTimeField(
         _("Created at"), auto_now_add=True, editable=False
     )
