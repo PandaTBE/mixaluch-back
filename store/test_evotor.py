@@ -66,6 +66,15 @@ class EvotorViewsTests(SimpleTestCase):
 
     @patch("store.evotor_views.EVOTOR_TOKEN", "test-server-secret")
     @patch("store.evotor_views.requests.get")
+    def test_uppercase_store_id_is_preserved(self, get):
+        store_id = "20250130-E3FC-40C8-8000-8C087AC8E377"
+        get.return_value.json.return_value = []
+        match = resolve(f"/api/admin/evotor/stores/{store_id}/products/")
+        self.assertEqual(self.request(EvotorProductsView, store_id=match.kwargs["store_id"]).status_code, 200)
+        self.assertTrue(get.call_args.args[0].endswith(f"/{store_id}/products"))
+
+    @patch("store.evotor_views.EVOTOR_TOKEN", "test-server-secret")
+    @patch("store.evotor_views.requests.get")
     def test_staff_requests_are_rate_limited(self, get):
         get.return_value.json.return_value = []
         for _ in range(30):

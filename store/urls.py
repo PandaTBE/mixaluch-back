@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 
 from . import evotor_views, views
 
@@ -6,7 +6,10 @@ app_name = "store"
 
 urlpatterns = [
     path("api/admin/evotor/stores/", evotor_views.EvotorStoresView.as_view(), name="admin_evotor_stores"),
-    path("api/admin/evotor/stores/<uuid:store_id>/products/", evotor_views.EvotorProductsView.as_view(), name="admin_evotor_products"),
+    re_path(
+        r"^api/admin/evotor/stores/(?P<store_id>[0-9A-Fa-f]{8}-(?:[0-9A-Fa-f]{4}-){3}[0-9A-Fa-f]{12})/products/$",
+        evotor_views.EvotorProductsView.as_view(), name="admin_evotor_products",
+    ),
     path("api/admin/products/", views.AdminProductListView.as_view(), name="admin_products"),
     path("api/v2/products/", views.ProductListV2View.as_view(), name="products_v2"),
     path("api/products/", views.ProductListView.as_view(), name="store_home"),
