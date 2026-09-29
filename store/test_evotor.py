@@ -77,7 +77,7 @@ class EvotorViewsTests(SimpleTestCase):
     @patch("store.evotor_views.requests.get")
     def test_staff_requests_are_rate_limited(self, get):
         get.return_value.json.return_value = []
-        for _ in range(30):
+        for _ in range(90):
             self.assertEqual(self.request(EvotorStoresView).status_code, 200)
         self.assertEqual(self.request(EvotorStoresView).status_code, 429)
-        self.assertEqual(get.call_count, 30)
+        self.assertEqual(get.call_count, 90)

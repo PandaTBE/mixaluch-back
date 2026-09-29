@@ -8,7 +8,7 @@ from config import EVOTOR_TOKEN
 
 
 class EvotorThrottle(UserRateThrottle):
-    rate = "30/min"
+    rate = "90/min"
 
 
 def evotor_response(path):
