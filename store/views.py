@@ -48,6 +48,55 @@ class ProductListV2Pagination(PageNumberPagination):
     page_size = 24
 
 
+class AdminProductPagination(PageNumberPagination):
+    page_size = 10
+
+    def get_page_size(self, request):
+        value = request.query_params.get("page_size", "10")
+        if value not in ("10", "25", "100"):
+            raise ValidationError({"page_size": "Допустимые значения: 10, 25, 100."})
+        return int(value)
+
+
+class AdminProductListView(generics.ListAPIView):
+    serializer_class = ProductSerializer
+    pagination_class = AdminProductPagination
+    permission_classes = [IsAdminUser]
+
+    def get_queryset(self):
+        params = self.request.query_params
+        search = params.get("search", "").strip()
+        sort_by = params.get("sort_by", "id")
+        sort_order = params.get("sort_order", "desc")
+        fields = {
+            "id": "id", "title": "title", "category": "category__name",
+            "regular_price": "regular_price", "discount_price": "discount_price",
+            "is_popular": "is_popular",
+        }
+        if len(search) > 255:
+            raise ValidationError({"search": "Не более 255 символов."})
+        if sort_by not in fields:
+            raise ValidationError({"sort_by": "Недопустимое поле сортировки."})
+        if sort_order not in ("asc", "desc"):
+            raise ValidationError({"sort_order": "Допустимые значения: asc, desc."})
+        queryset = Product.objects.all()
+        category_value = params.get("category")
+        if category_value is not None:
+            if (not category_value.isascii() or not category_value.isdecimal()
+                    or len(category_value) > 19 or not 0 < int(category_value) < 2**63):
+                raise ValidationError({"category": "Укажите числовой ID категории."})
+            category = Category.objects.filter(pk=int(category_value)).first()
+            if category is None:
+                raise ValidationError({"category": "Категория не найдена."})
+            queryset = queryset.filter(category__in=category.get_descendants(include_self=True))
+        if search:
+            queryset = queryset.filter(Q(title__icontains=search) | Q(category__name__icontains=search))
+        ordering = fields[sort_by]
+        if sort_order == "desc":
+            ordering = f"-{ordering}"
+        return queryset.prefetch_related("product_image", "external_ids").order_by(ordering, "-id")
+
+
 class ProductListV2View(generics.ListAPIView):
     serializer_class = ProductCardSerializer
     pagination_class = ProductListV2Pagination
@@ -146,21 +195,9 @@ class ProductImageCrateApiView(generics.CreateAPIView):
     serializer_class = ImageSerializer
     permission_classes = [IsAdminUser]
 
-    def perform_create(self, serializer):
-        serializer.save(image=self.request.data.get("image"))
-
 
 class ProductImageRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ProductImage.objects.all()
     serializer_class = ImageSerializer
     permission_classes = [IsAdminUser]
     parser_classes = [parsers.MultiPartParser]
-
-    def perform_update(self, serializer):
-        image_file = self.request.data.get("image", None)
-
-        if image_file:
-            serializer.validated_data["image"] = image_file
-            serializer.save()
-        else:
-            serializer.save()

@@ -248,3 +248,147 @@ class ProductListV2Tests(TestCase):
         self.assertEqual(item["id"], product.id)
         self.assertEqual([image["id"] for image in item["product_image"]], [main.id])
         self.assertNotIn("external_ids", item)
+
+
+class AdminProductListTests(TestCase):
+    url = "/api/admin/products/"
+
+    def setUp(self):
+        self.client = APIClient()
+        self.staff = get_user_model().objects.create(
+            email="admin@example.test", name="Admin", phone_number="123", is_staff=True
+        )
+        self.root = Category.objects.create(name="Meat", slug="admin-meat", is_active=False)
+        self.child = Category.objects.create(name="Poultry", slug="admin-poultry", parent=self.root)
+        self.other = Category.objects.create(name="Vegetables", slug="admin-vegetables")
+        self.client.force_authenticate(self.staff)
+
+    def product(self, title, category=None, **kwargs):
+        return Product.objects.create(
+            category=category or self.root, title=title,
+            slug=f"admin-product-{Product.objects.count()}",
+            regular_price=100, discount_price=0, **kwargs,
+        )
+
+    def test_only_staff_can_list_products(self):
+        self.client.force_authenticate(None)
+        self.assertEqual(self.client.get(self.url).status_code, 401)
+        self.staff.is_staff = False
+        self.client.force_authenticate(self.staff)
+        self.assertEqual(self.client.get(self.url).status_code, 403)
+
+    def test_filters_include_hidden_descendants_and_combine_with_search(self):
+        self.product("Beef", is_active=False)
+        child = self.product("Chicken", self.child)
+        self.product("Carrot", self.other)
+        response = self.client.get(self.url, {"category": self.root.id})
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual(response.data["count"], 2)
+        response = self.client.get(self.url, {"category": self.root.id, "search": " CHICK "})
+        self.assertEqual([row["id"] for row in response.data["results"]], [child.id])
+        response = self.client.get(self.url, {"search": "Poultry"})
+        self.assertEqual([row["id"] for row in response.data["results"]], [child.id])
+        self.assertIn("external_ids", response.data["results"][0])
+        self.assertIsInstance(self.client.get("/api/products/").data, list)
+
+    def test_pagination_and_sorting_are_stable(self):
+        products = [self.product(f"Product {i:02}") for i in range(26)]
+        response = self.client.get(self.url, {"page_size": 10, "sort_by": "regular_price", "sort_order": "asc"})
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual(response.data["count"], 26)
+        self.assertEqual(len(response.data["results"]), 10)
+        second = self.client.get(response.data["next"])
+        ids = [row["id"] for row in response.data["results"] + second.data["results"]]
+        self.assertEqual(ids, [product.id for product in reversed(products)][:20])
+        for size, expected in ((25, 25), (100, 26)):
+            self.assertEqual(len(self.client.get(self.url, {"page_size": size}).data["results"]), expected)
+        names = self.client.get(self.url, {"sort_by": "title", "sort_order": "asc"}).data["results"]
+        self.assertEqual(names[0]["title"], "Product 00")
+
+    def test_invalid_filters_are_rejected(self):
+        for params in ({"category": "x"}, {"category": "0"}, {"category": "999999"},
+                       {"category": "9" * 50}, {"search": "x" * 256},
+                       {"page_size": "-1"}, {"page_size": "1000"}, {"page_size": "abc"},
+                       {"sort_by": "external_ids"}, {"sort_order": "sideways"}):
+            with self.subTest(params=params):
+                self.assertEqual(self.client.get(self.url, params).status_code, 400)
+        self.assertEqual(self.client.get(self.url, {"page": "0"}).status_code, 404)
+
+
+class AdminProductEditingTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.staff = get_user_model().objects.create(
+            email="editor@example.test", name="Editor", phone_number="123", is_staff=True
+        )
+        self.category = Category.objects.create(name="Editing", slug="editing")
+        self.product = Product.objects.create(
+            category=self.category, title="Before", slug="before", regular_price=100, discount_price=0
+        )
+        self.client.force_authenticate(self.staff)
+
+    def test_product_patch_persists_editable_fields_and_rejects_nonstaff(self):
+        url = f"/api/products/{self.product.id}/"
+        fields = {"title": "After", "regular_price": 200, "min_quantity": 0.5,
+                  "is_popular": True, "description": "Changed", "is_negotiable_price": True}
+        response = self.client.patch(url, fields, format="json")
+        self.assertEqual(response.status_code, 200, response.data)
+        self.product.refresh_from_db()
+        for field, value in fields.items():
+            self.assertEqual(getattr(self.product, field), value)
+        self.staff.is_staff = False
+        response = self.client.patch(url, {"title": "Denied"}, format="json")
+        self.assertEqual(response.status_code, 403)
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.title, "After")
+
+    def test_image_upload_update_and_validation(self):
+        import tempfile
+        from io import BytesIO
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from django.test import override_settings
+        from PIL import Image
+
+        def upload(name="photo.png", valid=True):
+            content = BytesIO()
+            if valid:
+                Image.new("RGB", (1, 1)).save(content, format="PNG")
+            else:
+                content.write(b"not an image")
+            return SimpleUploadedFile(name, content.getvalue(), content_type="image/png")
+
+        with tempfile.TemporaryDirectory() as media, override_settings(MEDIA_ROOT=media):
+            url = "/api/products/image/"
+            for data in ({"product": self.product.id},
+                         {"product": self.product.id, "image": upload(valid=False)}):
+                response = self.client.post(url, data, format="multipart")
+                self.assertEqual(response.status_code, 400, response.data)
+            self.assertFalse(ProductImage.objects.exists())
+            response = self.client.post(url, {"product": self.product.id, "image": upload()}, format="multipart")
+            self.assertEqual(response.status_code, 201, response.data)
+            image = ProductImage.objects.get(pk=response.data["id"])
+            detail = f"{url}{image.id}/"
+            response = self.client.patch(detail, {"alt_text": "Changed", "is_feature": True}, format="multipart")
+            self.assertEqual(response.status_code, 200, response.data)
+            image.refresh_from_db()
+            original_name = image.image.name
+            self.assertEqual(image.alt_text, "Changed")
+            self.assertTrue(image.is_feature)
+            response = self.client.put(
+                detail, {"product": self.product.id, "alt_text": "Full update", "is_feature": True},
+                format="multipart",
+            )
+            self.assertEqual(response.status_code, 200, response.data)
+            image.refresh_from_db()
+            self.assertEqual(image.alt_text, "Full update")
+            self.assertEqual(image.image.name, original_name)
+            response = self.client.patch(detail, {"image": upload(valid=False)}, format="multipart")
+            self.assertEqual(response.status_code, 400, response.data)
+            image.refresh_from_db()
+            self.assertEqual(image.image.name, original_name)
+            response = self.client.patch(detail, {"image": upload("replacement.png")}, format="multipart")
+            self.assertEqual(response.status_code, 200, response.data)
+            self.assertIn("replacement", response.data["image"])
+            self.staff.is_staff = False
+            response = self.client.patch(detail, {"alt_text": "Denied"}, format="multipart")
+            self.assertEqual(response.status_code, 403)

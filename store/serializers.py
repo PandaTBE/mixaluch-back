@@ -5,14 +5,20 @@ from .models import Product, ProductImage, ProductExternalId
 
 
 class ImageSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField("get_image_url")
+    image = serializers.ImageField(required=False)
 
     class Meta:
         model = ProductImage
         fields = "__all__"
 
-    def get_image_url(self, obj):
-        return f"{HOST_URL}{obj.image.url}"
+    def validate(self, attrs):
+        if self.instance is None and "image" not in attrs:
+            raise serializers.ValidationError({"image": "Загрузите изображение."})
+        return attrs
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        return {**data, "image": f"{HOST_URL}{instance.image.url}" if instance.image else None}
 
 
 class ProductExternalIdSerializer(serializers.ModelSerializer):

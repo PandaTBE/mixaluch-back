@@ -1,10 +1,13 @@
 from django.urls import path
 
-from . import views
+from . import evotor_views, views
 
 app_name = "store"
 
 urlpatterns = [
+    path("api/admin/evotor/stores/", evotor_views.EvotorStoresView.as_view(), name="admin_evotor_stores"),
+    path("api/admin/evotor/stores/<uuid:store_id>/products/", evotor_views.EvotorProductsView.as_view(), name="admin_evotor_products"),
+    path("api/admin/products/", views.AdminProductListView.as_view(), name="admin_products"),
     path("api/v2/products/", views.ProductListV2View.as_view(), name="products_v2"),
     path("api/products/", views.ProductListView.as_view(), name="store_home"),
     path("api/products/<int:pk>/", views.SingleProduct.as_view(), name="product"),
